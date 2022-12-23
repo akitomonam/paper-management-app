@@ -78,9 +78,6 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// SQLをログ出力するように設定する
-	// db.LogMode(true)
-
 	// file_dbsからすべてのレコードを取得する
 	var fileDbs []File_dbs
 	if err := db.Find(&fileDbs).Error; err != nil {
@@ -89,10 +86,6 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	// 生成したJSONデータをコンソールに出力する
-	// jsonBytes, _ := json.Marshal(fileDbs)
-	// fmt.Println(string(jsonBytes))
 
 	// file_dbsの中身をJSON形式で返す
 	w.Header().Set("Content-Type", "application/json")

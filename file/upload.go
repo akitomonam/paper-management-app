@@ -25,18 +25,21 @@ type File_dbs struct {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	status := "True"
 	// CORSのアクセス制御を行う
 	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
 	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
 
 	if r.Method != "POST" {
+		status = "False"
 		http.Error(w, "処理を終了します。", http.StatusMethodNotAllowed)
 		return
 	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 	if err := r.ParseMultipartForm(MaxUploadSize); err != nil {
+		status = "False"
 		http.Error(w, "1MB以下のファイルを選択してください。", http.StatusBadRequest)
 		fmt.Println("ParseMultipartFormでエラーが発生:", err)
 		return
@@ -45,6 +48,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// フォームのファイルを取得する
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
+		status = "False"
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println("ParseMultipartFormでエラーが発生:", err)
 		return
@@ -54,6 +58,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// 保存用のディレクトリを作成する（存在していなければ、保存用のディレクトリを新規作成）
 	err = os.MkdirAll("./uploadfiles", os.ModePerm)
 	if err != nil {
+		status = "False"
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -62,12 +67,14 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	buff := make([]byte, 512)
 	_, err = file.Read(buff)
 	if err != nil {
+		status = "False"
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	filetype := http.DetectContentType(buff)
 	if filetype != "image/jpeg" && filetype != "image/png" && filetype != "application/pdf" {
+		status = "False"
 		http.Error(w, "JPEG、PNG、または、PDFでアップロードしてください。", http.StatusBadRequest)
 		return
 	}
@@ -108,6 +115,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// 保存するファイルを作成する
 	dst, err := os.Create(savePath)
 	if err != nil {
+		status = "False"
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -117,6 +125,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// アップロードしたファイルを保存用のディレクトリにコピーする
 	_, err = io.Copy(dst, file)
 	if err != nil {
+		status = "False"
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -126,7 +135,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// アップロード成功のレスポンスを返す
 	response := map[string]string{
-		"status":   "success",
+		"status":   status,
 		"filename": filename,
 	}
 	w.Header().Set("Content-Type", "application/json")
