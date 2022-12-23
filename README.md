@@ -1,4 +1,6 @@
 # ファイルアップロードWEBアプリ
+<img width="631" alt="image" src="https://user-images.githubusercontent.com/72239675/209383133-4c4008d9-71dc-4682-adec-683825b01ea4.png">
+
 # 仕様
 - ファイルをアップロードし、それをサーバー側でDBに保存。  
 - DBを参照してアップロード済みファイル一覧を表示。
