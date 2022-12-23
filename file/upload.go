@@ -35,13 +35,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmt.Println("POSTリクエストを受け取りました")
-	// fmt.Println("リクエストのURL:", r.URL)
-	// fmt.Println("リクエストのヘッダー:", r.Header)
-	// fmt.Println("リクエストのボディ:", r.Body)
-
-	// return
-
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 	if err := r.ParseMultipartForm(MaxUploadSize); err != nil {
 		http.Error(w, "1MB以下のファイルを選択してください。", http.StatusBadRequest)
@@ -88,7 +81,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// ファイル名を取得する
 	filename := fileHeader.Filename
-
 	// ファイル名から拡張子を取り出す
 	ext := filepath.Ext(filename)
 
@@ -109,6 +101,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			i++
 		}
+		// ファイル名を更新する
+		filename = filename[:len(filename)-len(ext)] + "(" + fmt.Sprint(i) + ")" + ext
 	}
 
 	// 保存するファイルを作成する
@@ -133,7 +127,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// アップロード成功のレスポンスを返す
 	response := map[string]string{
 		"status":   "success",
-		"filename": fileHeader.Filename,
+		"filename": filename,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
