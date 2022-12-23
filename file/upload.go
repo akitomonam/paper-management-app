@@ -7,9 +7,21 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 const MaxUploadSize = 1024 * 1024 // 最大ファイルサイズ
+
+// Users ユーザー情報のテーブル情報
+type File_dbs struct {
+	ID       int
+	Filename string `json:"filename"`
+	Filepath string `json:"filepath"`
+	Updateat string `json:"updateAt" sql:"not null;type:datetime"`
+}
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -99,6 +111,48 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//DBにパスなどのメタ情報を保存
+	add2sql(filename, savePath)
+
 	fmt.Fprintf(w, "アップロード成功！")
 	fmt.Fprintf(w, "アップロードされたファイル: %v", fileHeader.Filename)
+}
+
+// SQLConnect DB接続
+func sqlConnect() (database *gorm.DB, err error) {
+	DBMS := "mysql"
+	USER := "root"
+	PASS := "sdkogaken"
+	PROTOCOL := "tcp(localhost:3306)"
+	DBNAME := "test_database"
+
+	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"
+	return gorm.Open(DBMS, CONNECT)
+}
+
+func add2sql(file_name string, file_path string) {
+	db, err := sqlConnect()
+	if err != nil {
+		panic(err.Error())
+	} else {
+		fmt.Println("DB接続成功")
+	}
+	defer db.Close()
+
+	error := db.Create(&File_dbs{
+		Filename: file_name,
+		Filepath: file_path,
+		Updateat: getDate(),
+	}).Error
+	if error != nil {
+		fmt.Println(error)
+	} else {
+		fmt.Println("データ追加成功")
+	}
+}
+
+func getDate() string {
+	const layout = "2006-01-02 15:04:05"
+	now := time.Now()
+	return now.Format(layout)
 }
