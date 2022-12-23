@@ -15,7 +15,7 @@ import (
 
 const MaxUploadSize = 1024 * 1024 // 最大ファイルサイズ
 
-// Users ユーザー情報のテーブル情報
+// File_dbs ファイルのメタ情報
 type File_dbs struct {
 	ID       int
 	Filename string `json:"filename"`

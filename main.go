@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"upload/file" //追加
+	"upload/file"
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +14,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	file.UploadHandler(w, r) //追加
+	file.UploadHandler(w, r)
 }
 
 func setupRoutes() {
