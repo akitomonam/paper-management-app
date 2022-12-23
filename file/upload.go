@@ -150,7 +150,7 @@ func add2sql(file_name string, file_path string) {
 	if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Println("DB接続成功")
+		fmt.Println("DB接続成功(ファイルアップロード)")
 	}
 	defer db.Close()
 

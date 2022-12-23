@@ -14,6 +14,7 @@ sudo apt install mysql-server
 sudo service mysql start
 sudo service mysql status
 ```
+Vueのインストール
 # 実行
 ```
 go run main.go
