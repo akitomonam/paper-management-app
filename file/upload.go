@@ -2,6 +2,7 @@
 package file
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,20 +25,35 @@ type File_dbs struct {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	// CORSのアクセス制御を行う
+	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+
 	if r.Method != "POST" {
 		http.Error(w, "処理を終了します。", http.StatusMethodNotAllowed)
 		return
 	}
 
+	// fmt.Println("POSTリクエストを受け取りました")
+	// fmt.Println("リクエストのURL:", r.URL)
+	// fmt.Println("リクエストのヘッダー:", r.Header)
+	// fmt.Println("リクエストのボディ:", r.Body)
+
+	// return
+
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 	if err := r.ParseMultipartForm(MaxUploadSize); err != nil {
 		http.Error(w, "1MB以下のファイルを選択してください。", http.StatusBadRequest)
+		fmt.Println("ParseMultipartFormでエラーが発生:", err)
+		return
 	}
 
 	// フォームのファイルを取得する
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("ParseMultipartFormでエラーが発生:", err)
 		return
 	}
 	defer file.Close()
@@ -114,8 +130,13 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	//DBにパスなどのメタ情報を保存
 	add2sql(filename, savePath)
 
-	fmt.Fprintf(w, "アップロード成功！")
-	fmt.Fprintf(w, "アップロードされたファイル: %v", fileHeader.Filename)
+	// アップロード成功のレスポンスを返す
+	response := map[string]string{
+		"status":   "success",
+		"filename": fileHeader.Filename,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 // SQLConnect DB接続

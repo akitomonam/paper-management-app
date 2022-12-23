@@ -22,12 +22,19 @@ func setupRoutes() {
 	mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/upload", uploadHandler)
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	if err := http.ListenAndServe(":12345", mux); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func serveVueApp() {
+	fs := http.FileServer(http.Dir("./fronted/dist"))
+	fmt.Println("Vue.jsアプリケーションをサーブ完了")
+	http.Handle("/", fs)
 }
 
 func main() {
 	fmt.Println("ファイルアップロード開始")
 	setupRoutes()
+	serveVueApp()
 }

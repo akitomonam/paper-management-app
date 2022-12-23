@@ -1,25 +1,52 @@
 <template>
   <div>
   <img alt="Vue logo" src="./assets/logo.png">
-  <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-  <h1>ファイルアップロード</h1>
-    <form id="form" enctype="multipart/form-data" action="/upload" method="POST">
-      <input type="file" name="file" class="input file-input" multiple>
-      <button class="button" type="submit">アップロード</button>
+    <form @submit.prevent="uploadFile">
+      <input type="file" ref="fileInput" />
+      <button type="submit">アップロード</button>
     </form>
+    <p>filename:{{ file_name }}</p>
+    <p>status:{{ upload_status }}</p>
   </div>
 </template>
 
-<!-- <script>
-import HelloWorld from './components/HelloWorld.vue'
+<script>
+import axios from 'axios';
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script> -->
+  data() {
+    return {
+      file_name: '', //Goから受け取るメッセージ
+      upload_status: '', //Goから受け取るメッセージ
+    };
+  },
+  methods: {
+    async uploadFile() {
+      const file = this.$refs.fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await axios.post('http://localhost:12345/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+          proxy: false //ローカルホストなのでプロキシを経由しない
+        })
+        if (response.data) { // レスポンスボディが存在する場合
+          this.file_name = response.data.filename // レスポンスボディのfilenameを参照して、responseMessageに代入する
+          this.upload_status = response.data.status
+        } else {
+          console.error('レスポンスボディが存在しません')
+        }
+      } catch (error) {
+        console.log('File uploaded Failed');
+        console.error(error);
+      }
+    },
+  },
+};
+</script>
 
 <style>
 #app {
