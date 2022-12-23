@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 const MaxUploadSize = 1024 * 1024 // 最大ファイルサイズ
@@ -23,7 +22,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "1MB以下のファイルを選択してください。", http.StatusBadRequest)
 	}
 
-	// 1. フォームのファイルを取得する
+	// フォームのファイルを取得する
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -31,7 +30,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// 2. 保存用のディレクトリを作成する（存在していなければ、保存用のディレクトリを新規作成）
+	// 保存用のディレクトリを作成する（存在していなければ、保存用のディレクトリを新規作成）
 	err = os.MkdirAll("./uploadfiles", os.ModePerm)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -59,8 +58,33 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. 保存するファイルを作成する
-	dst, err := os.Create(fmt.Sprintf("./uploadfiles/%d%s", time.Now().UnixNano(), filepath.Ext(fileHeader.Filename)))
+	// ファイル名を取得する
+	filename := fileHeader.Filename
+
+	// ファイル名から拡張子を取り出す
+	ext := filepath.Ext(filename)
+
+	// 保存先のパスを生成する
+	savePath := "./uploadfiles/" + filename
+
+	// os.Statで、保存先のパスが存在するか確認する
+	_, err = os.Stat(savePath)
+	if err == nil {
+		// 同名のファイルがある場合は、番号をつけて保存するようにする
+		// 番号をつける
+		i := 1
+		for {
+			savePath = "./uploadfiles/" + filename[:len(filename)-len(ext)] + "(" + fmt.Sprint(i) + ")" + ext
+			_, err = os.Stat(savePath)
+			if err != nil {
+				break
+			}
+			i++
+		}
+	}
+
+	// 保存するファイルを作成する
+	dst, err := os.Create(savePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,7 +92,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer dst.Close()
 
-	// 4. アップロードしたファイルを保存用のディレクトリにコピーする
+	// アップロードしたファイルを保存用のディレクトリにコピーする
 	_, err = io.Copy(dst, file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,4 +100,5 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "アップロード成功！")
+	fmt.Fprintf(w, "アップロードされたファイル: %v", fileHeader.Filename)
 }
