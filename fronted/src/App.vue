@@ -10,7 +10,7 @@
     <p>status:{{ upload_status }}</p>
     <h2>アップロード済みファイル一覧</h2>
     <!-- テーブル一覧を1つずつ表示する -->
-    <table border style="margin: 0 auto">
+    <table border style="margin: 0 auto" @click="showFile">
       <tr v-for="table in tables" :key="table">
         <td>{{ table }}</td>
       </tr>
@@ -40,13 +40,15 @@ export default {
       formData.append('file', file);
 
       try {
-        const response = await axios.post('http://localhost:12345/upload', formData, {
+        const response = await axios.post('http://localhost:12345/upload/file', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
           proxy: false //ローカルホストなのでプロキシを経由しない
         })
         if (response.data) { // レスポンスボディが存在する場合
+          console.log("response.data", response.data)
+          console.log(typeof response.data)
           this.file_name = response.data.filename // レスポンスボディのfilenameを参照して、responseMessageに代入する
           this.upload_status = response.data.status
           this.getDB()
@@ -60,9 +62,46 @@ export default {
     },
     getDB: function(){
       axios.get("http://localhost:12345/api/tables").then((res) => {
-      this.tables = res.data;
-    });
-    }
+        this.tables = res.data;
+      });
+    },
+    // tableをクリックした際に実行される処理
+    async showFile(event) {
+      console.log("click table!!!")
+      // table要素がクリックされたときに、クリックされたtable要素のテキストを取得する
+      var fileContent = event.target.textContent;
+      fileContent = fileContent.replace(/\s/g, "");  // 文字列中のスペースを取り除く
+      fileContent = fileContent.replace(/"/g, "");  // 文字列中の"を取り除く
+      fileContent = fileContent.replace(/'/g, "");  // 文字列中の'を取り除く
+      fileContent = fileContent.replace(/\n/g, "");  // 文字列中の改行を取り除く
+      var fileNameElements = fileContent.split(",");  // 文字列を","で分割する
+      let targetFilepath = "";  // 目的の文字列を格納する変数
+
+      // 分割された要素を検索する
+      for (const element of fileNameElements) {
+        if (element.startsWith("filepath:")) {  // 要素が"filepath": の文字列で始まるかを確認する
+          // "filepath": のあとの文字列を取り出す
+          targetFilepath = element.replace("filepath:", "").trim();
+          // targetFilepath = targetFilepath.replace('./', '');
+          break;  // ループを抜ける
+        }
+      }
+      console.log("targetFilepath", targetFilepath);  // 目的の文字列を出力する
+      // サーバーに保管されているファイルをプレビューする
+      axios.get(`http://localhost:12345/api/preview?fileName=${targetFilepath}`).then(response => {
+          // プレビューするファイルのURLを取得する
+          const fileUrl = response.data.fileUrl;
+          // プレビューするファイルのURLをもとに、新しいタブを開く
+          console.log("response.data", response.data)
+          console.log("response.data", typeof response.data)
+          console.log("fileUrl", fileUrl)
+          window.open(fileUrl, '_blank');
+        })
+        .catch(error => {
+          console.log("ファイルプレビューAPIでエラーが発生しました")
+          console.error(error)
+        });
+    },
   },
 };
 </script>

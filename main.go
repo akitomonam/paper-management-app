@@ -90,16 +90,80 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	// file_dbsの中身をJSON形式で返す
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(fileDbs); err != nil {
+		fmt.Println("エラー:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
+// GoプログラムでAPIを作成する
+func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("apiPreviewHandlerが呼び出されました")
+	// CORSのアクセス制御を行う
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+
+	// ファイル名を取得する
+	fileName := r.URL.Query().Get("fileName")
+	fmt.Println("クリックしたファイルの名前:", fileName)
+
+	// ファイルのURLを取得する
+	fileUrl, err := getFileUrl(fileName)
+	fmt.Println("fileUrl:", fileUrl)
+	if err != nil {
+		// エラーを出力する
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		// レスポンスボディを作成する
+		responseBody, err := json.Marshal(map[string]string{
+			"fileUrl": fileUrl,
+		})
+		if err != nil {
+			// エラーを出力する
+			fmt.Println("エラー:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// レスポンスを送信する
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(responseBody)
+	}
+}
+
+// ファイルのURLを取得する関数
+func getFileUrl(fileName string) (string, error) {
+	// ファイルのURLを格納する変数
+	var fileUrl string
+
+	// データベースに接続する
+	db, err := sqlConnect()
+	if err != nil {
+		return "", err
+	}
+	defer db.Close()
+
+	// file_dbsから指定したファイル名のレコードを1件取得する
+	var fileDb File_dbs
+	// if err := db.Where("filename = ?", fileName).First(&fileDb).Error; err != nil {
+	if err := db.Where("filepath = ?", fileName).First(&fileDb).Error; err != nil {
+		fmt.Println("エラー(getFileUrl):", err)
+		return "", err
+	}
+
+	// 取得したレコードのfilepathをfileUrlに代入する
+	fileUrl = fileDb.Filepath
+
+	return fileUrl, nil
+}
+
 func setupRoutes() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", indexHandler)
-	mux.HandleFunc("/upload", uploadHandler)
+	mux.HandleFunc("/upload/file", uploadHandler)
 	mux.HandleFunc("/api/tables", apiTablesHandler)
+	mux.HandleFunc("/api/preview", apiPreviewHandler)
 
 	if err := http.ListenAndServe(":12345", mux); err != nil {
 		log.Fatal(err)
