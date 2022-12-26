@@ -19,6 +19,9 @@ sudo service mysql status
 Vueのインストール
 # 実行
 ```
+cd ./fronted
+npm run serve
+cd ..
 go run main.go
 ```
 # 検証環境
