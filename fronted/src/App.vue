@@ -82,7 +82,6 @@ export default {
         if (element.startsWith("filepath:")) {  // 要素が"filepath": の文字列で始まるかを確認する
           // "filepath": のあとの文字列を取り出す
           targetFilepath = element.replace("filepath:", "").trim();
-          // targetFilepath = targetFilepath.replace('./', '');
           break;  // ループを抜ける
         }
       }
@@ -90,12 +89,10 @@ export default {
       // サーバーに保管されているファイルをプレビューする
       axios.get(`http://localhost:12345/api/preview?fileName=${targetFilepath}`).then(response => {
           // プレビューするファイルのURLを取得する
-          const fileUrl = response.data.fileUrl;
+          let filepath = response.data.fileUrl;
           // プレビューするファイルのURLをもとに、新しいタブを開く
-          console.log("response.data", response.data)
-          console.log("response.data", typeof response.data)
-          console.log("fileUrl", fileUrl)
-          window.open(fileUrl, '_blank');
+          filepath = filepath.replace(/^\./, '');
+          window.open(`http://172.21.65.107:12345${filepath}`, '_blank');
         })
         .catch(error => {
           console.log("ファイルプレビューAPIでエラーが発生しました")

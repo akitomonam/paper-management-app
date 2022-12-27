@@ -20,15 +20,18 @@ type File_dbs struct {
 	Updateat time.Time `json:"updateAt"`
 }
 
+// IndexHandler インデックスページを表示するハンドラ
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
 	http.ServeFile(w, r, "index.html")
 }
 
+// UploadHandler アップロードを行うハンドラ
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	file.UploadHandler(w, r)
 }
 
+// GetTableList テーブル一覧を取得する
 func getTableList(db *gorm.DB) ([]string, error) {
 	// テーブル一覧を取得するSQL文
 	query := "SHOW TABLES"
@@ -65,6 +68,7 @@ func sqlConnect() (database *gorm.DB, err error) {
 	return gorm.Open(DBMS, CONNECT)
 }
 
+// APITablesHandler file_dbsの中身をJSON形式で返すハンドラ
 func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	// CORSのアクセス制御を行う
 	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
@@ -96,7 +100,7 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GoプログラムでAPIを作成する
+// pdfのプレビュー処理
 func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiPreviewHandlerが呼び出されました")
 	// CORSのアクセス制御を行う
@@ -160,10 +164,11 @@ func getFileUrl(fileName string) (string, error) {
 
 func setupRoutes() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", indexHandler)
+	// mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/upload/file", uploadHandler)
 	mux.HandleFunc("/api/tables", apiTablesHandler)
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
+	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(":12345", mux); err != nil {
 		log.Fatal(err)
