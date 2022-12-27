@@ -1,27 +1,41 @@
 <template>
   <div>
     <img alt="MinamiLab logo" src="./assets/minami_lab_logo.png">
-    <h1>File Management</h1>
+    <h1>Paper Management Site</h1>
     <form @submit.prevent="uploadFile">
       <input type="file" ref="fileInput" />
       <button type="submit">Upload</button>
     </form>
     <p>filename:{{ file_name }}</p>
     <p>status:{{ upload_status }}</p>
-    <h2>アップロード済みファイル一覧</h2>
+    <h2>Uploaded File List</h2>
     <!-- テーブル一覧を1つずつ表示する -->
-    <table border style="margin: 0 auto" @click="showFile">
-      <tr v-for="table in tables" :key="table">
-        <td>{{ table }}</td>
-      </tr>
+    <table>
+      <div class="draggable-container" style="display: flex; justify-content: center">
+      <draggable v-model="tables" group="people" item-key="ID" handle=".handle">
+          <template #item="{element}">
+            <tr style="border: solid 1px #000;">
+                <div class="drag-item">
+                  <span class="handle">・</span>
+                  {{ element.filename }}
+                  <button @click="showFile((element.filepath))">Preview</button>
+                </div>
+              </tr>
+          </template>
+      </draggable>
+    </div>
     </table>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import draggable from 'vuedraggable';
 
 export default {
+  components: {
+    draggable,
+  },
   data() {
     return {
       file_name: null, //Goから受け取るアップロードされたファイル名
@@ -66,25 +80,8 @@ export default {
       });
     },
     // tableをクリックした際に実行される処理
-    async showFile(event) {
+    async showFile(targetFilepath) {
       console.log("click table!!!")
-      // table要素がクリックされたときに、クリックされたtable要素のテキストを取得する
-      var fileContent = event.target.textContent;
-      fileContent = fileContent.replace(/\s/g, "");  // 文字列中のスペースを取り除く
-      fileContent = fileContent.replace(/"/g, "");  // 文字列中の"を取り除く
-      fileContent = fileContent.replace(/'/g, "");  // 文字列中の'を取り除く
-      fileContent = fileContent.replace(/\n/g, "");  // 文字列中の改行を取り除く
-      var fileNameElements = fileContent.split(",");  // 文字列を","で分割する
-      let targetFilepath = "";  // 目的の文字列を格納する変数
-
-      // 分割された要素を検索する
-      for (const element of fileNameElements) {
-        if (element.startsWith("filepath:")) {  // 要素が"filepath": の文字列で始まるかを確認する
-          // "filepath": のあとの文字列を取り出す
-          targetFilepath = element.replace("filepath:", "").trim();
-          break;  // ループを抜ける
-        }
-      }
       console.log("targetFilepath", targetFilepath);  // 目的の文字列を出力する
       // サーバーに保管されているファイルをプレビューする
       axios.get(`http://localhost:12345/api/preview?fileName=${targetFilepath}`).then(response => {
@@ -147,11 +144,6 @@ table {
   border-collapse: collapse;
   width: 60%;
   margin: 0 auto;
-}
-
-td {
-  border: 1px solid #ddd;
-  padding: 8px;
 }
 
 tr:nth-child(even) {
