@@ -37,6 +37,7 @@
 <script>
 import axios from 'axios';
 import draggable from 'vuedraggable';
+import { config } from '../config';
 
 export default {
   components: {
@@ -58,9 +59,8 @@ export default {
       const file = this.$refs.fileInput.files[0];
       const formData = new FormData();
       formData.append('file', file);
-
       try {
-        const response = await axios.post('http://localhost:12345/upload/file', formData, {
+        const response = await axios.post(`${config.URL}:${config.PORT}/upload/file`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -81,7 +81,7 @@ export default {
       }
     },
     getDB: function(){
-      axios.get("http://localhost:12345/api/tables").then((res) => {
+      axios.get(`${config.URL}:${config.PORT}/api/tables`).then((res) => {
         this.tables = res.data;
       });
     },
@@ -90,12 +90,12 @@ export default {
       console.log("click table!!!")
       console.log("targetFilepath", targetFilepath);  // 目的の文字列を出力する
       // サーバーに保管されているファイルをプレビューする
-      axios.get(`http://localhost:12345/api/preview?fileName=${targetFilepath}`).then(response => {
+      axios.get(`${config.URL}:${config.PORT}/api/preview?fileName=${targetFilepath}`).then(response => {
           // プレビューするファイルのURLを取得する
           let filepath = response.data.fileUrl;
           // プレビューするファイルのURLをもとに、新しいタブを開く
           filepath = filepath.replace(/^\./, '');
-          window.open(`http://172.21.65.107:12345${filepath}`, '_blank');
+          window.open(`${config.URL}:${config.PORT}${filepath}`, '_blank');
         })
         .catch(error => {
           console.log("ファイルプレビューAPIでエラーが発生しました")
