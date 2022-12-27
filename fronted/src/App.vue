@@ -1,7 +1,9 @@
 <template>
   <div>
-    <img alt="MinamiLab logo" src="./assets/minami_lab_logo.png">
-    <h1>Paper Management Site</h1>
+    <header style="display: flex; align-items: center; justify-content: center; background-color: transparent">
+      <img alt="MinamiLab logo" src="./assets/minami_lab_logo.png" style="height: 100px; width: 100px">
+      <h1 style="color: #000">Paper Management Site</h1>
+    </header>
     <form @submit.prevent="uploadFile">
       <input type="file" ref="fileInput" />
       <button type="submit">Upload</button>
@@ -25,6 +27,10 @@
       </draggable>
     </div>
     </table>
+    <footer>
+      <p>Created:Akitomo SATO</p>
+      <p>University of Electro-communications</p>
+    </footer>
   </div>
 </template>
 
@@ -170,13 +176,12 @@ p {
   font-weight: bold;
 }
 
-/* filename: の装飾をする */
-p:nth-child(1) {
-  color: blue;
-}
-
-/* status: の装飾をする */
-p:nth-child(2) {
-  color: green;
+footer {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+  background-color: rgba(255, 255, 255, 0);
+  padding: 1px;
+  font-size: 1px;
 }
 </style>
