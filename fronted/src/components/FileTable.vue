@@ -1,11 +1,12 @@
 <template>
+    <!-- <div class="notion-panel"> -->
     <table>
-        <div class="draggable-container" style="display: flex; justify-content: center">
+        <div class="draggable-container" style="display: flex;">
             <draggable v-model="localTables" group="people" item-key="ID" handle=".handle">
                 <template #item="{ element }">
                     <tr style="border: solid 1px #000">
                         <div class="drag-item">
-                            <span class="handle">・</span>
+                            <img src="../assets/drag_drop_button.png" class="handle" />
                             {{ element.filename }}
                             <button @click="showFile(element.filepath)">Preview</button>
                         </div>
@@ -14,6 +15,7 @@
             </draggable>
         </div>
     </table>
+<!-- </div> -->
 </template>
 
 <script>
@@ -97,11 +99,21 @@ tr:hover {
     background-color: #ddd;
 }
 
-th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #4caf50;
-    color: white;
+.handle {
+    /* background: #3d3c3c17; */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    /* font-size: 10px; */
+    text-align: center;
+    /* line-height: 110px; */
 }
+/* Notion のようなパネルを装飾する */
+.notion-panel {
+    border: solid 1px #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
 </style>
