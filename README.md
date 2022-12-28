@@ -1,5 +1,5 @@
 # ファイルアップロードWEBアプリ
-<img width="631" alt="image" src="https://user-images.githubusercontent.com/72239675/209383133-4c4008d9-71dc-4682-adec-683825b01ea4.png">
+![image](https://user-images.githubusercontent.com/72239675/209828493-44812c03-32c5-42d7-884a-9789c88e2875.png)
 
 # 仕様
 - ファイルをアップロードし、それをサーバー側でDBに保存  
