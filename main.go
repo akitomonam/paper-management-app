@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"strconv"
 	"time"
 	"upload/file"
@@ -110,8 +109,6 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 
 	fileID, err := strconv.Atoi(r.URL.Query().Get("fileId"))
 	// 削除対象のファイルを特定し、削除する処理を実行する
-	fmt.Println("fileID:", fileID)
-	fmt.Println("fileID:", reflect.TypeOf(fileID))
 	// DBに接続する
 	db, err := sqlConnect()
 	if err != nil {
@@ -159,11 +156,11 @@ func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
 	// ファイル名を取得する
-	fileName := r.URL.Query().Get("fileName")
-	fmt.Println("クリックしたファイルの名前:", fileName)
+	fileId, err := strconv.Atoi(r.URL.Query().Get("fileId"))
+	fmt.Println("クリックしたファイルのID:", fileId)
 
 	// ファイルのURLを取得する
-	fileUrl, err := getFileUrl(fileName)
+	fileUrl, err := getFileUrl(fileId)
 	fmt.Println("fileUrl:", fileUrl)
 	if err != nil {
 		// エラーを出力する
@@ -188,7 +185,7 @@ func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ファイルのURLを取得する関数
-func getFileUrl(fileName string) (string, error) {
+func getFileUrl(fileId int) (string, error) {
 	// ファイルのURLを格納する変数
 	var fileUrl string
 
@@ -201,8 +198,8 @@ func getFileUrl(fileName string) (string, error) {
 
 	// file_dbsから指定したファイル名のレコードを1件取得する
 	var fileDb File_dbs
-	// if err := db.Where("filename = ?", fileName).First(&fileDb).Error; err != nil {
-	if err := db.Where("filepath = ?", fileName).First(&fileDb).Error; err != nil {
+	// if err := db.Where("filename = ?", fileId).First(&fileDb).Error; err != nil {
+	if err := db.Where("id = ?", fileId).First(&fileDb).Error; err != nil {
 		fmt.Println("エラー(getFileUrl):", err)
 		return "", err
 	}

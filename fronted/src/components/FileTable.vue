@@ -7,7 +7,7 @@
                         <div class="drag-item">
                             <img src="../assets/drag_drop_button.png" class="handle" />
                             {{ element.filename }}
-                            <button @click="showFile(element.filepath)">Preview</button>
+                            <button @click="showFile(element.ID)">Preview</button>
                             <button @click="deleteFile(element.ID)">Delete</button>
                         </div>
                     </tr>
@@ -44,13 +44,13 @@ export default {
     },
     methods: {
         // tableをクリックした際に実行される処理
-        async showFile(targetFilepath) {
+        async showFile(targetFileId) {
             console.log("click table!!!");
-            console.log("targetFilepath", targetFilepath); // 目的の文字列を出力する
+            console.log("targetFileId", targetFileId); // 目的の文字列を出力する
             // サーバーに保管されているファイルをプレビューする
             axios
                 .get(
-                    `${config.URL}:${config.PORT}/api/preview?fileName=${targetFilepath}`
+                    `${config.URL}:${config.PORT}/api/preview?fileId=${targetFileId}`
                 )
                 .then((response) => {
                     // プレビューするファイルのURLを取得する
