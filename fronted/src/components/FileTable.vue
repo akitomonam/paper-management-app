@@ -1,5 +1,4 @@
 <template>
-    <!-- <div class="notion-panel"> -->
     <table>
         <div class="draggable-container" style="display: flex;">
             <draggable v-model="localTables" group="people" item-key="ID" handle=".handle">
@@ -9,13 +8,13 @@
                             <img src="../assets/drag_drop_button.png" class="handle" />
                             {{ element.filename }}
                             <button @click="showFile(element.filepath)">Preview</button>
+                            <button @click="deleteFile(element.ID)">Delete</button>
                         </div>
                     </tr>
                 </template>
             </draggable>
         </div>
     </table>
-<!-- </div> -->
 </template>
 
 <script>
@@ -44,10 +43,6 @@ export default {
         this.localTables = this.tables;
     },
     methods: {
-        // 親コンポーネントにイベントを発火させる
-        updateTables() {
-            this.$emit("update-tables", this.localTables);
-        },
         // tableをクリックした際に実行される処理
         async showFile(targetFilepath) {
             console.log("click table!!!");
@@ -69,15 +64,30 @@ export default {
                     console.error(error);
                 });
         },
+        async deleteFile(targetFileId) {
+            console.log("targetFileId:", targetFileId)
+            try {
+                const response = await axios.get(`${config.URL}:${config.PORT}/api/delete?fileId=${targetFileId}`)
+                if (response.data) { // レスポンスボディが存在する場合
+                    console.log("response.data", response.data);
+                    if (response.data.result == "true") {
+                        alert("ファイル削除に成功しました。")
+                        this.$emit('update-tables') // 親コンポーネントに発火
+                    } else {
+                        alert("ファイル削除に失敗しました。")
+                    }
+                } else {
+                    console.error('レスポンスボディが存在しません')
+                }
+            } catch {
+                console.log('File delete Failed');
+            }
+        }
     },
     watch: {
         // tablesプロパティが更新されたら、localTablesも更新
         tables(newTables) {
             this.localTables = newTables;
-        },
-        // localTablesが更新されたら、updateTablesを実行
-        localTables() {
-            this.updateTables();
         },
     },
 };
@@ -109,11 +119,4 @@ tr:hover {
     text-align: center;
     /* line-height: 110px; */
 }
-/* Notion のようなパネルを装飾する */
-.notion-panel {
-    border: solid 1px #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
 </style>

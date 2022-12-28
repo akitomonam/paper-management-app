@@ -6,7 +6,6 @@
     <p>status:{{ upload_status }}</p>
     <h2>Uploaded File List</h2>
     <FileTable :tables="tables" @update-tables="updateTables"/>
-    <!-- <FileTable v-model="tables"/> -->
     <FooterComponent />
   </div>
 </template>
@@ -39,11 +38,14 @@ export default {
     this.getDB();
   },
   methods: {
-    updateTables(newTables) {
+    updateTables() {
       // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
-      this.tables = newTables;
+      // this.tables = newTables;
+      console.log("updateTablesが呼び出されました")
+      this.getDB();
     },
     updateUploadStatus(responseData) {
+      console.log("updateUploadStatusが呼び出されました")
       this.file_name = responseData.filename;
       this.upload_status = responseData.status;
       this.getDB();

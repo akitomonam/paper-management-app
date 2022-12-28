@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"reflect"
+	"strconv"
 	"time"
 	"upload/file"
 
@@ -100,6 +103,54 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+	fmt.Println("deleteFileHandlerが呼び出されました")
+
+	fileID, err := strconv.Atoi(r.URL.Query().Get("fileId"))
+	// 削除対象のファイルを特定し、削除する処理を実行する
+	fmt.Println("fileID:", fileID)
+	fmt.Println("fileID:", reflect.TypeOf(fileID))
+	// DBに接続する
+	db, err := sqlConnect()
+	if err != nil {
+		http.Error(w, "DB接続失敗", http.StatusInternalServerError)
+		fmt.Println("DB接続失敗")
+		return
+	}
+	defer db.Close()
+
+	// file_dbsテーブルからIDを指定してレコードを取得する
+	var fileDb File_dbs
+	if err := db.Where("id = ?", fileID).First(&fileDb).Error; err != nil {
+		// http.Error(w, "レコードが見つかりません", http.StatusNotFound)
+		fmt.Println("レコードが見つかりません")
+		fmt.Println("レコードが見つかりません:", err)
+		// レスポンスを返す
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
+		return
+	}
+	// file_dbsテーブルからレコードを削除する
+	fmt.Println("filedb:", &fileDb)
+	if err := db.Delete(&fileDb).Error; err != nil {
+		http.Error(w, "データの削除に失敗しました", http.StatusInternalServerError)
+		fmt.Println("データの削除に失敗しました")
+		return
+	}
+	//DBから取得したファイルパスでファイルの削除
+	if err := os.Remove(fileDb.Filepath); err != nil {
+		http.Error(w, "ファイルの削除に失敗しました", http.StatusInternalServerError)
+		fmt.Println("ファイルの削除に失敗しました")
+		return
+	}
+	// レスポンスを返す
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"result": "true"})
+	fmt.Println("finish deletefile")
+}
+
 // pdfのプレビュー処理
 func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiPreviewHandlerが呼び出されました")
@@ -166,6 +217,7 @@ func setupRoutes() {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/upload/file", uploadHandler)
+	mux.HandleFunc("/api/delete", deleteFileHandler)
 	mux.HandleFunc("/api/tables", apiTablesHandler)
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
