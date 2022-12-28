@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +21,40 @@ type File_dbs struct {
 	Filename string    `json:"filename"`
 	Filepath string    `json:"filepath"`
 	Updateat time.Time `json:"updateAt"`
+}
+
+type Config struct {
+	DBMS   string `json:"dbms"`
+	User   string `json:"user"`
+	Pass   string `json:"pass"`
+	Server string `json:"server"`
+	DBName string `json:"dbname"`
+}
+
+// 設定値を保持する変数
+var config Config
+
+func getConfig() Config {
+	// 設定ファイルを開く
+	file, err := os.Open("db_config.json")
+	if err != nil {
+		return Config{}
+	}
+	defer file.Close()
+
+	// 設定ファイルを読み込む
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return Config{}
+	}
+
+	// 設定ファイルをパースする
+	var config Config
+	if err := json.Unmarshal(bytes, &config); err != nil {
+		return Config{}
+	}
+
+	return config
 }
 
 // IndexHandler インデックスページを表示するハンドラ
@@ -58,13 +93,13 @@ func getTableList(db *gorm.DB) ([]string, error) {
 	return tables, nil
 }
 
-// SQLConnect DB接続
+// DB接続
 func sqlConnect() (database *gorm.DB, err error) {
-	DBMS := "mysql"
-	USER := "root"
-	PASS := "sdkogaken"
-	PROTOCOL := "tcp(localhost:3306)"
-	DBNAME := "test_database"
+	DBMS := config.DBMS
+	USER := config.User
+	PASS := config.Pass
+	PROTOCOL := config.Server
+	DBNAME := config.DBName
 
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"
 	return gorm.Open(DBMS, CONNECT)
@@ -231,7 +266,9 @@ func serveVueApp() {
 }
 
 func main() {
-	fmt.Println("ファイルアップロード開始")
+	// 設定値を取得する
+	config = getConfig()
+
 	setupRoutes()
 	serveVueApp()
 }
