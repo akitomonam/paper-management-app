@@ -31,8 +31,7 @@ type Config struct {
 	DBName string `json:"dbname"`
 }
 
-// 設定値を保持する変数
-var config Config
+var db *gorm.DB
 
 func getConfig() Config {
 	// 設定ファイルを開く
@@ -94,7 +93,7 @@ func getTableList(db *gorm.DB) ([]string, error) {
 }
 
 // DB接続
-func sqlConnect() (database *gorm.DB, err error) {
+func sqlConnect(config Config) (database *gorm.DB, err error) {
 	DBMS := config.DBMS
 	USER := config.User
 	PASS := config.Pass
@@ -110,14 +109,6 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	// CORSのアクセス制御を行う
 	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
-	db, err := sqlConnect()
-	if err != nil {
-		panic(err.Error())
-	} else {
-		fmt.Println("DB接続成功(アップロード済みファイル一覧取得)")
-	}
-	defer db.Close()
 
 	// file_dbsからすべてのレコードを取得する
 	var fileDbs []File_dbs
@@ -142,17 +133,8 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 	fmt.Println("deleteFileHandlerが呼び出されました")
 
-	fileID, err := strconv.Atoi(r.URL.Query().Get("fileId"))
+	fileID, _ := strconv.Atoi(r.URL.Query().Get("fileId"))
 	// 削除対象のファイルを特定し、削除する処理を実行する
-	// DBに接続する
-	db, err := sqlConnect()
-	if err != nil {
-		http.Error(w, "DB接続失敗", http.StatusInternalServerError)
-		fmt.Println("DB接続失敗")
-		return
-	}
-	defer db.Close()
-
 	// file_dbsテーブルからIDを指定してレコードを取得する
 	var fileDb File_dbs
 	if err := db.Where("id = ?", fileID).First(&fileDb).Error; err != nil {
@@ -224,16 +206,8 @@ func getFileUrl(fileId int) (string, error) {
 	// ファイルのURLを格納する変数
 	var fileUrl string
 
-	// データベースに接続する
-	db, err := sqlConnect()
-	if err != nil {
-		return "", err
-	}
-	defer db.Close()
-
 	// file_dbsから指定したファイル名のレコードを1件取得する
 	var fileDb File_dbs
-	// if err := db.Where("filename = ?", fileId).First(&fileDb).Error; err != nil {
 	if err := db.Where("id = ?", fileId).First(&fileDb).Error; err != nil {
 		fmt.Println("エラー(getFileUrl):", err)
 		return "", err
@@ -267,7 +241,16 @@ func serveVueApp() {
 
 func main() {
 	// 設定値を取得する
-	config = getConfig()
+	config := getConfig()
+	// データベースと接続
+	var err error
+	db, err = sqlConnect(config)
+	if err != nil {
+		log.Fatal("Error connecting to database:", err)
+	} else {
+		fmt.Println("DB接続成功")
+	}
+	defer db.Close()
 
 	setupRoutes()
 	serveVueApp()
