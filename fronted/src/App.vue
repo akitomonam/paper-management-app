@@ -2,8 +2,8 @@
   <div>
     <HeaderComponent />
     <UploadForm @update-upload-status="updateUploadStatus" />
-    <p>filename:{{ file_name }}</p>
-    <p>status:{{ upload_status }}</p>
+    <!-- <p>filename:{{ file_name }}</p>
+    <p>status:{{ upload_status }}</p> -->
     <h2>Uploaded File List</h2>
     <FileTable :tables="tables" @update-tables="updateTables"/>
     <FooterComponent />
@@ -28,8 +28,8 @@ export default {
   },
   data() {
     return {
-      file_name: null, //Goから受け取るアップロードされたファイル名
-      upload_status: null, //Goから受け取るアップロードステータス
+      // file_name: null, //Goから受け取るアップロードされたファイル名
+      // upload_status: null, //Goから受け取るアップロードステータス
       tables: [], // Goから受け取るテーブル一覧を格納するデータプロパティ
     };
   },
@@ -40,14 +40,11 @@ export default {
   methods: {
     updateTables() {
       // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
-      // this.tables = newTables;
-      console.log("updateTablesが呼び出されました")
       this.getDB();
     },
-    updateUploadStatus(responseData) {
-      console.log("updateUploadStatusが呼び出されました")
-      this.file_name = responseData.filename;
-      this.upload_status = responseData.status;
+    updateUploadStatus() {
+      // this.file_name = responseData.filename;
+      // this.upload_status = responseData.status;
       this.getDB();
     },
     getDB: function(){

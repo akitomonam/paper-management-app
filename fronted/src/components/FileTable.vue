@@ -66,21 +66,23 @@ export default {
         },
         async deleteFile(targetFileId) {
             console.log("targetFileId:", targetFileId)
-            try {
-                const response = await axios.get(`${config.URL}:${config.PORT}/api/delete?fileId=${targetFileId}`)
-                if (response.data) { // レスポンスボディが存在する場合
-                    console.log("response.data", response.data);
-                    if (response.data.result == "true") {
-                        alert("ファイル削除に成功しました。")
-                        this.$emit('update-tables') // 親コンポーネントに発火
+            if (confirm('本当に削除しますか？')) {
+                try {
+                    const response = await axios.get(`${config.URL}:${config.PORT}/api/delete?fileId=${targetFileId}`)
+                    if (response.data) { // レスポンスボディが存在する場合
+                        console.log("response.data", response.data);
+                        if (response.data.result == "true") {
+                            alert("ファイル削除に成功しました。")
+                            this.$emit('update-tables') // 親コンポーネントに発火
+                        } else {
+                            alert("ファイル削除に失敗しました。")
+                        }
                     } else {
-                        alert("ファイル削除に失敗しました。")
+                        console.error('レスポンスボディが存在しません')
                     }
-                } else {
-                    console.error('レスポンスボディが存在しません')
+                } catch {
+                    console.log('File delete Failed');
                 }
-            } catch {
-                console.log('File delete Failed');
             }
         }
     },
