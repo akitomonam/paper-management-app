@@ -1,4 +1,4 @@
-# ファイルアップロード WEB アプリ
+# 論文管理 WEB アプリ
 
 ![image](https://user-images.githubusercontent.com/72239675/209828493-44812c03-32c5-42d7-884a-9789c88e2875.png)
 
