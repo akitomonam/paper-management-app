@@ -29,6 +29,7 @@ type Config struct {
 	Pass   string `json:"pass"`
 	Server string `json:"server"`
 	DBName string `json:"dbname"`
+	GoPort string `json:"go_port"`
 }
 
 var db *gorm.DB
@@ -219,7 +220,7 @@ func getFileUrl(fileId int) (string, error) {
 	return fileUrl, nil
 }
 
-func setupRoutes() {
+func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/upload/file", uploadHandler)
@@ -228,7 +229,7 @@ func setupRoutes() {
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
-	if err := http.ListenAndServe(":12345", mux); err != nil {
+	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -252,6 +253,6 @@ func main() {
 	}
 	defer db.Close()
 
-	setupRoutes()
+	setupRoutes(config)
 	serveVueApp()
 }

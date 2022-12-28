@@ -3,5 +3,6 @@
     "user": "hoge",
     "pass": "fuga",
     "server": "tcp(localhost:3306)",
-    "dbname": "hogefuga_database"
+    "dbname": "hogefuga_database",
+    "go_port":":12345"
 }
