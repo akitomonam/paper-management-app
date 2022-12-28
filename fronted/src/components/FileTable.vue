@@ -1,6 +1,6 @@
 <template>
     <table>
-        <div class="draggable-container" style="display: flex;">
+        <div class="draggable-container">
             <draggable v-model="localTables" group="people" item-key="ID" handle=".handle">
                 <template #item="{ element }">
                     <tr style="border: solid 1px #000">
@@ -97,7 +97,6 @@ export default {
 /* アップロード済みファイル一覧を装飾する */
 table {
     border-collapse: collapse;
-    width: 60%;
     margin: 0 auto;
 }
 
