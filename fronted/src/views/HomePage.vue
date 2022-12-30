@@ -3,14 +3,12 @@
         <UploadForm @update-upload-status="updateUploadStatus" />
         <h2>Uploaded File List</h2>
         <FileTable :tables="tables" @update-tables="updateTables" />
-        <FooterComponent />
     </div>
 </template>
 
 <script>
 import UploadForm from "../components/UploadForm.vue";
 import FileTable from "../components/FileTable.vue";
-import FooterComponent from "../components/FooterComponent.vue";
 import axios from "axios";
 import { config } from "../../config";
 
@@ -19,7 +17,6 @@ export default {
     components: {
         UploadForm,
         FileTable,
-        FooterComponent,
     },
     data() {
         return {

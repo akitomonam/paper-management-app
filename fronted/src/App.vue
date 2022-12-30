@@ -6,18 +6,22 @@
     <HeaderComponent />
     <SideBar v-bind:isOpen="isOpen" @changeOpen="changeOpen" />
     <router-view />
+    <FooterComponent />
   </div>
 </template>
 
 <script>
 import HeaderComponent from "./components/HeaderComponent.vue";
 import SideBar from "./components/SideBar.vue";
+import FooterComponent from "./components/FooterComponent.vue";
+
 
 export default {
   name: "PaperManagement",
   components: {
     HeaderComponent,
     SideBar,
+    FooterComponent,
   },
   data() {
     return {
