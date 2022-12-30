@@ -1,8 +1,9 @@
 <template>
     <div class="sidebar" v-bind:class="{ open: isOpen }">
         <ul>
-            <li><a href="#">マイページ</a></li>
-            <li><a href="#">ログイン</a></li>
+            <li><router-link to="/">ホーム</router-link></li>
+            <li><router-link to="/mypage">マイページ</router-link></li>
+            <li><router-link to="/login">ログイン</router-link></li>
             <li><a href="#">ログアウト</a></li>
         </ul>
     </div>

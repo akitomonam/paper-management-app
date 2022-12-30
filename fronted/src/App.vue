@@ -5,66 +5,32 @@
     </button>
     <HeaderComponent />
     <SideBar v-bind:isOpen="isOpen" @changeOpen="changeOpen" />
-    <UploadForm @update-upload-status="updateUploadStatus" />
-    <!-- <p>filename:{{ file_name }}</p>
-    <p>status:{{ upload_status }}</p> -->
-    <h2>Uploaded File List</h2>
-    <FileTable :tables="tables" @update-tables="updateTables" />
-    <FooterComponent />
+    <router-view />
   </div>
 </template>
 
 <script>
 import HeaderComponent from "./components/HeaderComponent.vue";
 import SideBar from "./components/SideBar.vue";
-import UploadForm from "./components/UploadForm.vue";
-import FileTable from "./components/FileTable.vue";
-import FooterComponent from "./components/FooterComponent.vue";
-import axios from "axios";
-import { config } from "../config";
 
 export default {
   name: "PaperManagement",
   components: {
     HeaderComponent,
     SideBar,
-    UploadForm,
-    FileTable,
-    FooterComponent,
   },
   data() {
     return {
-      // file_name: null, //Goから受け取るアップロードされたファイル名
-      // upload_status: null, //Goから受け取るアップロードステータス
       isOpen: false, // サイドバーの表示状態を管理するデータプロパティ
-      tables: [], // Goから受け取るテーブル一覧を格納するデータプロパティ
-    };
-  },
-  created() {
-    // MySQLに接続してテーブル一覧を取得する
-    this.getDB();
+    }
   },
   methods: {
-    updateTables() {
-      // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
-      this.getDB();
-    },
-    updateUploadStatus() {
-      // this.file_name = responseData.filename;
-      // this.upload_status = responseData.status;
-      this.getDB();
-    },
-    getDB: function () {
-      axios.get(`${config.URL}:${config.PORT}/api/tables`).then((res) => {
-        this.tables = res.data;
-      });
-    },
     changeOpen() {
       // サイドバーの表示状態を反転する
       this.isOpen = !this.isOpen;
     },
   },
-};
+}
 </script>
 
 <style>
@@ -73,15 +39,20 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  color: #2c3e50;
 }
 
-/* filename: 及び status: を装飾する */
-p {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
+#nav {
+  padding: 30px;
+}
+
+#nav a {
   font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
 }
 
 .settings-button {
