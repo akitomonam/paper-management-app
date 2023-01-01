@@ -32,6 +32,12 @@ type Config struct {
 	GoPort string `json:"go_port"`
 }
 
+type UsersLoginfo struct {
+	ID       int    `db:"id"`
+	Username string `db:"username"`
+	Password string `db:"password"`
+}
+
 var db *gorm.DB
 
 func getConfig() Config {
@@ -220,6 +226,44 @@ func getFileUrl(fileId int) (string, error) {
 	return fileUrl, nil
 }
 
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("loginHandlerが呼び出されました")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	// ユーザー名とパスワードを使用して、ログイン処理を行う
+	var user UsersLoginfo
+	if err := db.Where("username = ? and password = ?", username, password).First(&user).Error; err != nil {
+		// ログインに失敗した場合
+		if gorm.IsRecordNotFoundError(err) {
+			// ユーザー名またはパスワードが間違っている
+			resp := struct {
+				Success bool   `json:"success"`
+				Message string `json:"message"`
+			}{
+				Success: false,
+				Message: "ユーザー名またはパスワードが間違っています",
+			}
+			respBytes, _ := json.Marshal(resp)
+			w.Write(respBytes)
+			return
+		}
+	}
+	// ログインに成功した場合
+	resp := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{
+		Success: true,
+		Message: "ログインに成功しました",
+	}
+	respBytes, _ := json.Marshal(resp)
+	w.Write(respBytes)
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -227,6 +271,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/delete", deleteFileHandler)
 	mux.HandleFunc("/api/tables", apiTablesHandler)
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
+	mux.HandleFunc("/api/login", loginHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {

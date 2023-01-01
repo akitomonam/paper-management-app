@@ -47,7 +47,7 @@ export default {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     },
-                    proxy: false //ローカルホストなのでプロキシを経由しない
+                    // proxy: false //ローカルホストなのでプロキシを経由しない
                 })
                 if (response.data) { // レスポンスボディが存在する場合
                     alert("ファイルアップロード完了\n" + "ファイル名:" + response.data.filename)
