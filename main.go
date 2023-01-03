@@ -264,6 +264,40 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(respBytes)
 }
 
+func signupHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("signupHandlerが呼び出されました")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	// ユーザー名とパスワードを使用して、サインアップ処理を行う
+	//ユーザー名とパスワードをDBに保存する
+	if err := db.Create(&UsersLoginfo{Username: username, Password: password}).Error; err != nil {
+		resp := struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: "既に登録されているユーザー名です",
+		}
+		respBytes, _ := json.Marshal(resp)
+		w.Write(respBytes)
+		return
+	}
+
+	resp := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{
+		Success: true,
+		Message: "サインアップに成功しました",
+	}
+	respBytes, _ := json.Marshal(resp)
+	w.Write(respBytes)
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -272,6 +306,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/tables", apiTablesHandler)
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
 	mux.HandleFunc("/api/login", loginHandler)
+	mux.HandleFunc("/api/signup", signupHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
