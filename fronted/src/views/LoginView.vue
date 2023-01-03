@@ -10,6 +10,7 @@
             <br />
             <button type="submit" @click.prevent="login">ログイン</button>
         </form>
+        <router-link to="/signup">サインアップ</router-link>
     </div>
 </template>
 
