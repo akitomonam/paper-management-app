@@ -6,7 +6,7 @@
                     <tr style="border: solid 1px #000">
                         <div class="drag-item">
                             <img src="../assets/drag_drop_button.png" class="handle" />
-                            {{ element.filename }}
+                            {{ element.file_name }}
                             <button @click="showFile(element.ID)">Preview</button>
                             <button @click="deleteFile(element.ID)">Delete</button>
                         </div>

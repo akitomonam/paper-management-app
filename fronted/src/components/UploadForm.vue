@@ -33,6 +33,13 @@ export default {
             this.isButtonDisabled = !this.$refs.fileInput.files[0];
         },
         async uploadFile() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            console.log("sessionToken:", sessionToken)
+            if (!sessionToken) {
+                alert("ログイン後にアップロードしてください")
+                return
+            }
+
             this.isUploading = true; // アップロード開始時に、アップロード中のステータスを表すデータプロパティを true に設定する
             // アップロード中に "." の数を増やす処理を開始
             this.uploadingStatusIntervalId = setInterval(() => {
@@ -45,9 +52,9 @@ export default {
             try {
                 const response = await axios.post(`${config.URL}:${config.PORT}/upload/file`, formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data'
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${sessionToken}`
                     },
-                    // proxy: false //ローカルホストなのでプロキシを経由しない
                 })
                 if (response.data) { // レスポンスボディが存在する場合
                     alert("ファイルアップロード完了\n" + "ファイル名:" + response.data.filename)

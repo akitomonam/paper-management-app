@@ -2,6 +2,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,16 +14,9 @@ import (
 	"time"
 	"upload/file"
 
+	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
 )
-
-// File_dbs ファイルのメタ情報
-type File_dbs struct {
-	ID       int
-	Filename string    `json:"filename"`
-	Filepath string    `json:"filepath"`
-	Updateat time.Time `json:"updateAt"`
-}
 
 type Config struct {
 	DBMS   string `json:"dbms"`
@@ -32,13 +27,46 @@ type Config struct {
 	GoPort string `json:"go_port"`
 }
 
-type UsersLoginfo struct {
-	ID       int    `db:"id"`
-	Username string `db:"username"`
-	Password string `db:"password"`
+type Users struct {
+	ID        int    `db:"id"`
+	Username  string `db:"username"`
+	Password  string `db:"password"`
+	File_path string `db:"file_path"`
+}
+
+// Papers ファイルのメタ情報
+type Papers struct {
+	ID         int
+	Title      string    `json:"title"`
+	Author     string    `json:"author"`
+	Publisher  string    `json:"publisher"`
+	Year       int       `json:"year"`
+	Abstract   string    `json:"abstract"`
+	File_name  string    `json:"file_name"`
+	File_path  string    `json:"file_path"`
+	User_id    int       `json:"user_id"`
+	Created_at time.Time `json:"created_at"`
+}
+
+type Favorites struct {
+	ID      int `db:"id"`
+	Paperid int `db:"paper_id"`
+	Userid  int `db:"user_id"`
+}
+
+type Keywords struct {
+	ID      int    `db:"id"`
+	Paperid int    `db:"paper_id"`
+	Keyword string `db:"keyword"`
+}
+
+type Sessions struct {
+	Session_Token string `db:"session_token"`
+	User_id       int    `db:"user_id"`
 }
 
 var db *gorm.DB
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
 func getConfig() Config {
 	// 設定ファイルを開く
@@ -111,14 +139,14 @@ func sqlConnect(config Config) (database *gorm.DB, err error) {
 	return gorm.Open(DBMS, CONNECT)
 }
 
-// APITablesHandler file_dbsの中身をJSON形式で返すハンドラ
+// APITablesHandler Papersの中身をJSON形式で返すハンドラ
 func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	// CORSのアクセス制御を行う
 	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
-	// file_dbsからすべてのレコードを取得する
-	var fileDbs []File_dbs
+	// Papersからすべてのレコードを取得する
+	var fileDbs []Papers
 	if err := db.Find(&fileDbs).Error; err != nil {
 		// エラーを出力する
 		fmt.Println("エラー:", err)
@@ -126,7 +154,7 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// file_dbsの中身をJSON形式で返す
+	// Papersの中身をJSON形式で返す
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(fileDbs); err != nil {
 		fmt.Println("エラー:", err)
@@ -142,8 +170,8 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 
 	fileID, _ := strconv.Atoi(r.URL.Query().Get("fileId"))
 	// 削除対象のファイルを特定し、削除する処理を実行する
-	// file_dbsテーブルからIDを指定してレコードを取得する
-	var fileDb File_dbs
+	// PapersテーブルからIDを指定してレコードを取得する
+	var fileDb Papers
 	if err := db.Where("id = ?", fileID).First(&fileDb).Error; err != nil {
 		// http.Error(w, "レコードが見つかりません", http.StatusNotFound)
 		fmt.Println("レコードが見つかりません")
@@ -153,7 +181,7 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
 		return
 	}
-	// file_dbsテーブルからレコードを削除する
+	// Papersテーブルからレコードを削除する
 	fmt.Println("filedb:", &fileDb)
 	if err := db.Delete(&fileDb).Error; err != nil {
 		http.Error(w, "データの削除に失敗しました", http.StatusInternalServerError)
@@ -161,7 +189,7 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//DBから取得したファイルパスでファイルの削除
-	if err := os.Remove(fileDb.Filepath); err != nil {
+	if err := os.Remove(fileDb.File_path); err != nil {
 		http.Error(w, "ファイルの削除に失敗しました", http.StatusInternalServerError)
 		fmt.Println("ファイルの削除に失敗しました")
 		return
@@ -213,15 +241,15 @@ func getFileUrl(fileId int) (string, error) {
 	// ファイルのURLを格納する変数
 	var fileUrl string
 
-	// file_dbsから指定したファイル名のレコードを1件取得する
-	var fileDb File_dbs
+	// Papersから指定したファイル名のレコードを1件取得する
+	var fileDb Papers
 	if err := db.Where("id = ?", fileId).First(&fileDb).Error; err != nil {
 		fmt.Println("エラー(getFileUrl):", err)
 		return "", err
 	}
 
 	// 取得したレコードのfilepathをfileUrlに代入する
-	fileUrl = fileDb.Filepath
+	fileUrl = fileDb.File_path
 
 	return fileUrl, nil
 }
@@ -235,7 +263,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	// ユーザー名とパスワードを使用して、ログイン処理を行う
-	var user UsersLoginfo
+	var user Users
 	if err := db.Where("username = ? and password = ?", username, password).First(&user).Error; err != nil {
 		// ログインに失敗した場合
 		if gorm.IsRecordNotFoundError(err) {
@@ -252,13 +280,43 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// ログインに成功した場合
+	session, err := store.Get(r, "session")
+	if err != nil {
+		fmt.Println("セッションGET失敗")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// トークンを生成する
+	b := make([]byte, 32)
+	rand.Read(b)
+	token := base64.StdEncoding.EncodeToString(b)
+	// セッションにトークンを保存する(必要ないかも)
+	session.Values["token"] = token
+	session.Save(r, w)
+
+	user_id := user.ID
+
+	if err := db.Create(&Sessions{User_id: user_id, Session_Token: token}).Error; err != nil {
+		resp := struct {
+			Success bool   `json:"success"`
+			Message string `json:"message"`
+		}{
+			Success: false,
+			Message: "セッション取得に失敗しました。",
+		}
+		respBytes, _ := json.Marshal(resp)
+		w.Write(respBytes)
+		return
+	}
+
 	resp := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
+		Token   string `json:"token"`
 	}{
 		Success: true,
 		Message: "ログインに成功しました",
+		Token:   token,
 	}
 	respBytes, _ := json.Marshal(resp)
 	w.Write(respBytes)
@@ -274,7 +332,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// ユーザー名とパスワードを使用して、サインアップ処理を行う
 	//ユーザー名とパスワードをDBに保存する
-	if err := db.Create(&UsersLoginfo{Username: username, Password: password}).Error; err != nil {
+	if err := db.Create(&Users{Username: username, Password: password}).Error; err != nil {
 		resp := struct {
 			Success bool   `json:"success"`
 			Message string `json:"message"`

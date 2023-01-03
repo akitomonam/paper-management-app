@@ -42,6 +42,7 @@
             <button v-if="user.isLocked" @click="unlockAccount">アカウントをアンロックする</button>
             <button v-else @click="lockAccount">アカウントをロックする</button>
         </div>
+        <button v-on:click="checkSessionToken">セッショントークン確認</button>
     </div>
 </template>
 
@@ -82,6 +83,10 @@ export default {
             };
             reader.readAsDataURL(file);
         },
+        checkSessionToken() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            console.log("sessionToken:",sessionToken)
+        }
     },
 }
 </script>

@@ -3,5 +3,6 @@
         {
             "mode": "auto"
         }
-    ]
+    ],
+    "go.formatTool": "default"
 }

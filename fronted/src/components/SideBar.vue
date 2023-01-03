@@ -4,7 +4,7 @@
             <li><router-link to="/">ホーム</router-link></li>
             <li><router-link to="/mypage">マイページ</router-link></li>
             <li><router-link to="/login">ログイン</router-link></li>
-            <li><a href="#">ログアウト</a></li>
+            <li><router-link to="/logout">ログアウト</router-link></li>
         </ul>
     </div>
 </template>

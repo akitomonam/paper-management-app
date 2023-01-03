@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,26 +17,53 @@ import (
 
 const MaxUploadSize = 1024 * 1024 // 最大ファイルサイズ
 
-// File_dbs ファイルのメタ情報
-type File_dbs struct {
-	ID       int
-	Filename string `json:"filename"`
-	Filepath string `json:"filepath"`
-	Updateat string `json:"updateAt" sql:"not null;type:datetime"`
+type Papers struct {
+	ID         int
+	Title      string `json:"title"`
+	Author     string `json:"author"`
+	Publisher  string `json:"publisher"`
+	Year       int    `json:"year"`
+	Abstract   string `json:"abstract"`
+	File_name  string `json:"file_name"`
+	File_path  string `json:"file_path"`
+	User_id    int    `json:"user_id"`
+	Created_at string `json:"created_at" sql:"not null;type:datetime"`
+	// Createdat time.Time `json:"created_at" sql:"not null;type:datetime"`
+}
+
+type Sessions struct {
+	SessionToken string `db:"session_token"`
+	User_id      int    `db:"user_id"`
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	status := "True"
 	// CORSのアクセス制御を行う
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+	w.Header().Set("Access-Control-Allow-Origin", "*")                            // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")                        // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") //  Content-Type, Authorizationヘッダーのみを許可する
 
-	if r.Method != "POST" {
-		status = "False"
-		http.Error(w, "処理を終了します。", http.StatusMethodNotAllowed)
+	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
+	if r.Method == http.MethodOptions {
 		return
 	}
+
+	// セッショントークンを受け取る
+	sessionToken := r.Header.Get("Authorization")
+	sessionToken = strings.TrimSpace(strings.TrimPrefix(sessionToken, "Bearer "))
+	fmt.Println("sessionToken:", sessionToken)
+	// セッションDBを検索
+	session, err := FindSession(sessionToken)
+	if err != nil {
+		// セッショントークンが無効の場合
+		status = "False"
+		fmt.Println("セッショントークンが無効です。:")
+		http.Error(w, "セッショントークンが無効です。", http.StatusUnauthorized)
+		return
+	}
+
+	// 有効である場合は、ユーザーIDを取得する
+	user_id := session.User_id
 
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 	if err := r.ParseMultipartForm(MaxUploadSize); err != nil {
@@ -131,7 +159,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//DBにパスなどのメタ情報を保存
-	add2sql(filename, savePath)
+	add2sql(filename, savePath, user_id)
 
 	// アップロード成功のレスポンスを返す
 	response := map[string]string{
@@ -154,7 +182,7 @@ func sqlConnect() (database *gorm.DB, err error) {
 	return gorm.Open(DBMS, CONNECT)
 }
 
-func add2sql(file_name string, file_path string) {
+func add2sql(file_name string, file_path string, user_id int) {
 	db, err := sqlConnect()
 	if err != nil {
 		panic(err.Error())
@@ -163,10 +191,11 @@ func add2sql(file_name string, file_path string) {
 	}
 	defer db.Close()
 
-	error := db.Create(&File_dbs{
-		Filename: file_name,
-		Filepath: file_path,
-		Updateat: getDate(),
+	error := db.Create(&Papers{
+		File_name:  file_name,
+		File_path:  file_path,
+		User_id:    user_id,
+		Created_at: getDate(),
 	}).Error
 	if error != nil {
 		fmt.Println(error)
@@ -179,4 +208,22 @@ func getDate() string {
 	const layout = "2006-01-02 15:04:05"
 	now := time.Now()
 	return now.Format(layout)
+}
+
+func FindSession(sessionToken string) (Sessions, error) {
+	// セッションDBを検索
+	var session Sessions
+	db, err := sqlConnect()
+	if err != nil {
+		panic(err.Error())
+	} else {
+		fmt.Println("DB接続成功(セッション検索)")
+	}
+	defer db.Close()
+	err = db.Where("session_token = ?", sessionToken).First(&session).Error
+	if err != nil {
+		// セッションが見つからない場合や、エラーが発生した場合
+		return Sessions{}, fmt.Errorf("セッションが無効です: %v", err)
+	}
+	return session, nil
 }
