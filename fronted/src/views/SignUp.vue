@@ -13,6 +13,9 @@
 </div>
 </template>
 <script>
+import axios from 'axios';
+import { config } from '../../config';
+
 export default {
     data() {
         return {
@@ -21,12 +24,33 @@ export default {
         };
     },
     methods: {
-        signup() {
-            // ここでユーザー名とパスワードを使用してサインアップ処理を行う
+        async signup() {
+            try {
+                const response = await axios.post(`${config.URL}:${config.PORT}/api/signup`, {
+                    username: this.username,
+                    password: this.password,
+                }, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                });
+                // サインアップが成功した場合
+                if (response.data.success) {
+                    alert(response.data.message);
+                    // ログイン画面に遷移する
+                    this.$router.push({ path: '/login' });
+                } else {
+                    // ログインが失敗した場合、エラーメッセージを表示する
+                    alert(response.data.message);
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
     },
 };
 </script>
+
 <style>
 
 </style>
