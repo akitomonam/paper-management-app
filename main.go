@@ -145,13 +145,36 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
-	// Papersからすべてのレコードを取得する
+	sessionToken := r.URL.Query().Get("sessionToken")
+	fmt.Println("table-list-sessionToken:", sessionToken)
+
 	var fileDbs []Papers
-	if err := db.Find(&fileDbs).Error; err != nil {
-		// エラーを出力する
-		fmt.Println("エラー:", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if sessionToken == "" {
+		fmt.Println("セッショントークンなし")
+		// Papersからすべてのレコードを取得する
+		if err := db.Find(&fileDbs).Error; err != nil {
+			// エラーを出力する
+			fmt.Println("エラー:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		fmt.Println("セッショントークンあり")
+		session, err := FindSession(sessionToken)
+		if err != nil {
+			fmt.Println("セッショントークンが無効です。:")
+			http.Error(w, "セッショントークンが無効です。", http.StatusUnauthorized)
+			return
+		}
+
+		user_id := session.User_id
+		//user_idを使用して、Papersからレコードを取得する
+		if err := db.Where("user_id = ?", user_id).Find(&fileDbs).Error; err != nil {
+			// エラーを出力する
+			fmt.Println("エラー:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Papersの中身をJSON形式で返す

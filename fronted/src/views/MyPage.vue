@@ -10,10 +10,8 @@
             </div>
         </div>
         <div>
-            <h2>アクティビティの履歴</h2>
-            <ul>
-                <li v-for="activity in activities" :key="activity.id">{{ activity.content }}</li>
-            </ul>
+            <h2>My Uploaded File List</h2>
+            <FileTable :tables="tables" @update-tables="updateTables" />
         </div>
         <div>
             <h2>設定の編集</h2>
@@ -49,7 +47,13 @@
 <script>
 import axios from "axios";
 import { config } from "../../config";
+import FileTable from "../components/FileTable.vue";
+
 export default {
+    name: "MyPage",
+    components: {
+        FileTable,
+    },
     data() {
         return {
             user: {
@@ -58,11 +62,12 @@ export default {
                 description: '',
                 isLocked: false,
             },
-            activities: [],
+            tables: []
         }
     },
     created() {
         this.getUsersDB()
+        this.getDB()
     },
     methods: {
         deleteAccount() {
@@ -99,6 +104,16 @@ export default {
                 console.log("res.data:", res.data)
                 this.user.name = res.data.Username;
                 console.log("user.name:", this.user.name)
+            });
+        },
+        updateTables() {
+            // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
+            this.getDB();
+        },
+        getDB: function () {
+            const sessionToken = localStorage.getItem('sessionToken');
+            axios.get(`${config.URL}:${config.PORT}/api/tables?sessionToken=${sessionToken}`).then((res) => {
+                this.tables = res.data;
             });
         },
     },
