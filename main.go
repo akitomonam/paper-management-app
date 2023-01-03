@@ -418,6 +418,33 @@ func userinfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func userlistHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+
+	type User struct {
+		Username string
+		Filepath string
+	}
+
+	var UserList []User
+	// Userからすべてのレコードを取得する
+	if err := db.Find(&UserList).Error; err != nil {
+		// エラーを出力する
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Userの中身をJSON形式で返す
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(UserList); err != nil {
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func FindSession(sessionToken string) (Sessions, error) {
 	// セッションDBを検索
 	var session Sessions
@@ -439,6 +466,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/login", loginHandler)
 	mux.HandleFunc("/api/signup", signupHandler)
 	mux.HandleFunc("/api/userinfo", userinfoHandler)
+	mux.HandleFunc("/api/userlist", userlistHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
