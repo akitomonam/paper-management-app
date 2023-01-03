@@ -5,7 +5,7 @@
             <h2>プロフィール情報</h2>
             <div>
                 <img src="{{ user.avatarUrl }}" alt="アバター画像" />
-                <p>{{ user.name }}</p>
+                <p>ユーザー名:{{ user.name }}</p>
                 <p>{{ user.description }}</p>
             </div>
         </div>
@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import axios from "axios";
+import { config } from "../../config";
 export default {
     data() {
         return {
@@ -58,6 +60,9 @@ export default {
             },
             activities: [],
         }
+    },
+    created() {
+        this.getUsersDB()
     },
     methods: {
         deleteAccount() {
@@ -86,7 +91,16 @@ export default {
         checkSessionToken() {
             const sessionToken = localStorage.getItem('sessionToken');
             console.log("sessionToken:",sessionToken)
-        }
+        },
+        getUsersDB: function () {
+            const sessionToken = localStorage.getItem('sessionToken');
+            console.log("sessionToken:", sessionToken)
+            axios.get(`${config.URL}:${config.PORT}/api/userinfo?sessionToken=${sessionToken}`).then((res) => {
+                console.log("res.data:", res.data)
+                this.user.name = res.data.Username;
+                console.log("user.name:", this.user.name)
+            });
+        },
     },
 }
 </script>

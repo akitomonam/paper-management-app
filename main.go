@@ -356,6 +356,56 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(respBytes)
 }
 
+func userinfoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+
+	sessionToken := r.URL.Query().Get("sessionToken")
+	fmt.Println("sessionToken:", sessionToken)
+
+	session, err := FindSession(sessionToken)
+	if err != nil {
+		fmt.Println("セッショントークンが無効です。:")
+		http.Error(w, "セッショントークンが無効です。", http.StatusUnauthorized)
+		return
+	}
+
+	user_id := session.User_id
+
+	var userDb Users
+	if err := db.Where("id = ?", user_id).First(&userDb).Error; err != nil {
+		fmt.Println("エラー(useInfo):", err)
+		return
+	}
+
+	// ユーザー情報を必要な情報のみ返す
+	userInfo := Users{
+		Username:  userDb.Username,
+		File_path: userDb.File_path,
+	}
+
+	// ユーザー情報をすべて返す
+	res, err := json.Marshal(userInfo)
+	if err != nil {
+		fmt.Println("エラー(useInfo):", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
+func FindSession(sessionToken string) (Sessions, error) {
+	// セッションDBを検索
+	var session Sessions
+	err := db.Where("session_token = ?", sessionToken).First(&session).Error
+	if err != nil {
+		// セッションが見つからない場合や、エラーが発生した場合
+		return Sessions{}, fmt.Errorf("セッションが無効です: %v", err)
+	}
+	return session, nil
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -365,6 +415,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/preview", apiPreviewHandler)
 	mux.HandleFunc("/api/login", loginHandler)
 	mux.HandleFunc("/api/signup", signupHandler)
+	mux.HandleFunc("/api/userinfo", userinfoHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
