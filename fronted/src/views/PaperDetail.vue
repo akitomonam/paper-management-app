@@ -15,10 +15,6 @@
                 <td>{{ paper.publisher }}</td>
             </tr>
             <tr>
-                <th>Uploader's ID:</th>
-                <td>{{ paper.user_id }}</td>
-            </tr>
-            <tr>
                 <th>Year:</th>
                 <td>{{ paper.year }}</td>
             </tr>
@@ -32,6 +28,10 @@
             <tr>
                 <th>File name:</th>
                 <td>{{ paper.file_name }}</td>
+            </tr>
+            <tr>
+                <th>Uploader's ID:</th>
+                <td>{{ paper.user_id }}</td>
             </tr>
             <tr>
                 <th>Created at:</th>
