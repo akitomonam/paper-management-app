@@ -18,8 +18,7 @@ file_path VARCHAR(255) NOT NULL,
 abstract TEXT NULL,
 user_id INT NOT NULL,
 created_at DATETIME NOT NULL,
-PRIMARY KEY (id),
-FOREIGN KEY (user_id) REFERENCES users (id));
+PRIMARY KEY (id));
 
 
 CREATE TABLE favorites (
@@ -27,19 +26,15 @@ id INT NOT NULL AUTO_INCREMENT,
 paper_id INT NOT NULL,
 user_id INT NOT NULL,
 rating INT NOT NULL,
-PRIMARY KEY (id),
-FOREIGN KEY (paper_id) REFERENCES papers (id),
-FOREIGN KEY (user_id) REFERENCES users (id));
+PRIMARY KEY (id));
 
 CREATE TABLE keywords (
 id INT NOT NULL AUTO_INCREMENT,
 paper_id INT NOT NULL,
 keyword VARCHAR(255) NOT NULL,
-PRIMARY KEY (id),
-FOREIGN KEY (paper_id) REFERENCES papers (id));
+PRIMARY KEY (id));
 
 CREATE TABLE sessions (
 session_token CHAR(128) NOT NULL,
 user_id INT NOT NULL,
-PRIMARY KEY (session_token),
-FOREIGN KEY (user_id) REFERENCES users (id));
+PRIMARY KEY (session_token));
