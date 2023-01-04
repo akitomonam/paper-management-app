@@ -12,6 +12,8 @@
         <div>
             <h2>My Uploaded File List</h2>
             <FileTable :tables="tables" @update-tables="updateTables" />
+            <h2>My Favorite File List</h2>
+            <FileTable :tables="favorite_tables" @update-tables="updateTables(true)" />
         </div>
         <div>
             <h2>設定の編集</h2>
@@ -62,12 +64,14 @@ export default {
                 description: '',
                 isLocked: false,
             },
-            tables: []
+            tables: [],
+            favorite_tables: []
         }
     },
     created() {
         this.getUsersDB()
-        this.getDB()
+        this.updateTables()
+        this.updateTables(true)
     },
     methods: {
         deleteAccount() {
@@ -106,14 +110,18 @@ export default {
                 console.log("user.name:", this.user.name)
             });
         },
-        updateTables() {
+        updateTables(favorite=false) {
             // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
-            this.getDB();
+            this.getDB(favorite);
         },
-        getDB: function () {
+        getDB: function (favorite) {
             const sessionToken = localStorage.getItem('sessionToken');
-            axios.get(`${config.URL}:${config.PORT}/api/tables?sessionToken=${sessionToken}`).then((res) => {
-                this.tables = res.data;
+            axios.get(`${config.URL}:${config.PORT}/api/tables?sessionToken=${sessionToken}&favorite=${favorite}`).then((res) => {
+                if (favorite) {
+                    this.favorite_tables = res.data
+                } else {
+                    this.tables = res.data;
+                }
             });
         },
     },

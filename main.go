@@ -149,8 +149,10 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
 	sessionToken := r.URL.Query().Get("sessionToken")
+	favorite_flag := r.URL.Query().Get("favorite")
 	// sessionToken, _ = url.QueryUnescape(sessionToken)
 	fmt.Println("table-list-sessionToken:", sessionToken)
+	fmt.Println("favorite_flag:", favorite_flag)
 
 	var fileDbs []Papers
 	if sessionToken == "" {
@@ -172,12 +174,28 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		user_id := session.User_id
-		//user_idを使用して、Papersからレコードを取得する
-		if err := db.Where("user_id = ?", user_id).Find(&fileDbs).Error; err != nil {
-			// エラーを出力する
-			fmt.Println("エラー:", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+
+		if favorite_flag == "true" {
+			// user_idを使用して、favoritesテーブルのratingが1であるpapers_idを用いてPapersからレコードを取得する
+			var favoriteIDs []int
+			if err := db.Table("favorites").Where("user_id = ? AND rating = 1", user_id).Pluck("paper_id", &favoriteIDs).Error; err != nil {
+				fmt.Println("エラー:", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			if err := db.Where("ID IN (?)", favoriteIDs).Find(&fileDbs).Error; err != nil {
+				fmt.Println("エラー:", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			//user_idを使用して、Papersからレコードを取得する
+			if err := db.Where("user_id = ?", user_id).Find(&fileDbs).Error; err != nil {
+				// エラーを出力する
+				fmt.Println("エラー:", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
