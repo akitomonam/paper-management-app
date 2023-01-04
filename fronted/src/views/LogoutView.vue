@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h1>Logout</h1>
         <!-- ログアウトボタンを表示する -->
         <button @click="logout">ログアウト</button>
     </div>

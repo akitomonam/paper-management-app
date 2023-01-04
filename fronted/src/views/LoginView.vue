@@ -1,6 +1,7 @@
 <!-- ログイン画面を表示するコンポーネント -->
 <template>
     <div>
+        <h1>Login</h1>
         <form>
             <label>ユーザー名:</label>
             <input type="text" v-model="username" />

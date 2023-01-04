@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h1>Home</h1>
         <UploadForm @update-upload-status="updateUploadStatus" />
         <h2>Uploaded File List</h2>
         <FileTable :tables="tables" @update-tables="updateTables" />
