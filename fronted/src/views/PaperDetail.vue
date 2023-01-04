@@ -1,24 +1,52 @@
 <template>
     <div>
-        <h1>{{ paper.title }}</h1>
-        <table>
-            <tr>
-                <th>Abstract:</th>
-                <td>{{ paper.abstract }}</td>
-            </tr>
-            <tr>
-                <th>Author:</th>
-                <td>{{ paper.author }}</td>
-            </tr>
-            <tr>
-                <th>Publisher:</th>
-                <td>{{ paper.publisher }}</td>
-            </tr>
-            <tr>
-                <th>Year:</th>
-                <td>{{ paper.year }}</td>
-            </tr>
-        </table>
+        <!-- 編集用のエリア -->
+        <div v-if="editMode">
+            <h1>Title: <input v-model="paper.title" type="text"></h1>
+            <table>
+                <tr>
+                    <th>Abstract:</th>
+                    <td><input v-model="paper.abstract" type="text"></td>
+                </tr>
+                <tr>
+                    <th>Author:</th>
+                    <td><input v-model="paper.author" type="text"></td>
+                </tr>
+                <tr>
+                    <th>Publisher:</th>
+                    <td><input v-model="paper.publisher" type="text"></td>
+                </tr>
+                <tr>
+                    <th>Year:</th>
+                    <td><input v-model="paper.year" type="number"></td>
+                </tr>
+            </table>
+        </div>
+        <!-- 編集前の表示 -->
+        <div v-else>
+            <h1>Title:{{ paper.title }}</h1>
+            <table>
+                <tr>
+                    <th>Abstract:</th>
+                    <td>{{ paper.abstract }}</td>
+                </tr>
+                <tr>
+                    <th>Author:</th>
+                    <td>{{ paper.author }}</td>
+                </tr>
+                <tr>
+                    <th>Publisher:</th>
+                    <td>{{ paper.publisher }}</td>
+                </tr>
+                <tr>
+                    <th>Year:</th>
+                    <td>{{ paper.year }}</td>
+                </tr>
+            </table>
+        </div>
+        <!-- <button class="edit-button" @click="editPaper">Edit</button> -->
+        <button class="edit-button" @click="editMode = !editMode">Edit</button>
+        <button v-if="editMode" class="edit-complete-button" @click="editPaper">Complete</button>
         <h2>File information</h2>
         <table>
             <tr>
@@ -62,7 +90,8 @@ export default {
                 title: '',
                 user_id: '',
                 year: ''
-            }
+            },
+            editMode: false
         }
     },
     created() {
@@ -114,7 +143,51 @@ export default {
                     console.log('File delete Failed');
                 }
             }
-        }
+        },
+        // 編集処理
+        async editPaper() {
+            // 画面上の文字列を取得する
+            let title = this.paper.title
+            let abstract = this.paper.abstract
+            let author = this.paper.author
+            let publisher = this.paper.publisher
+            let year = this.paper.year
+
+            // データベースに反映する
+            await axios
+                .post(
+                    `${config.URL}:${config.PORT}/api/editpaperinfo`,
+                    {
+                        id: this.paper.ID,
+                        title: title,
+                        abstract: abstract,
+                        author: author,
+                        publisher: publisher,
+                        year: year
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }
+                )
+                .then((response) => {
+                    console.log("edit response", response);
+                    console.log("編集が完了しました");
+                    // 画面上の文字列を更新する
+                    this.paper.title = response.data.title;
+                    this.paper.abstract = response.data.abstract;
+                    this.paper.author = response.data.author;
+                    this.paper.publisher = response.data.publisher;
+                    this.paper.year = response.data.year;
+                    this.editMode = false;
+                })
+                .catch((error) => {
+                    console.log("編集APIでエラーが発生しました");
+                    console.error(error);
+                    alert("編集APIでエラーが発生しました")
+                });
+        },
     },
 }
 </script>

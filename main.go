@@ -477,8 +477,6 @@ func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
 	// URL パスの最後のセグメントを取得する
 	_, id := path.Split(r.URL.Path)
 
-	fmt.Println("id:", id)
-
 	// id を使って、DB から論文の詳細情報を取得する処理を記述する
 	var Paper Papers
 	if err := db.Where("id = ?", id).First(&Paper).Error; err != nil {
@@ -501,6 +499,57 @@ func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("apiEditPaperInfoHandlerが呼び出されました")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+
+	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	title := r.FormValue("title")
+	abstract := r.FormValue("abstract")
+	author := r.FormValue("author")
+	publisher := r.FormValue("publisher")
+	year, err := strconv.Atoi(r.FormValue("year"))
+	if err != nil {
+		http.Error(w, "Invalid Year", http.StatusBadRequest)
+		return
+	}
+
+	// id を使って、DB から論文の詳細情報を取得して、「Title,Author,Publisher,Year,Abstract」を更新する
+	var paper Papers
+	if err := db.Where("id = ?", id).First(&paper).Error; err != nil {
+		http.Error(w, "Paper not found", http.StatusNotFound)
+		return
+	}
+	paper.Title = title
+	paper.Abstract = abstract
+	paper.Author = author
+	paper.Publisher = publisher
+	paper.Year = year
+	if err := db.Save(&paper).Error; err != nil {
+		http.Error(w, "Error updating paper", http.StatusInternalServerError)
+		return
+	}
+	res, err := json.Marshal(paper)
+	if err != nil {
+		fmt.Println("エラー(paper):", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -513,6 +562,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/userinfo", userinfoHandler)
 	mux.HandleFunc("/api/userlist", userlistHandler)
 	mux.HandleFunc("/api/papers/", apiPapersHandler)
+	mux.HandleFunc("/api/editpaperinfo", apiEditPaperInfoHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
