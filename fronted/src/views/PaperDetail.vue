@@ -24,7 +24,13 @@
         </div>
         <!-- 編集前の表示 -->
         <div v-else>
-            <h1>Title:{{ paper.title }}</h1>
+            <div style="display:flex;justify-content:center;">
+                <star-rating @update:rating="setRating" v-bind:rating="rating"
+                    :max-rating="1" :show-rating="false" :clearable="true"
+                    :animate="true" :rounded-corners="true">
+                </star-rating>
+                <h1 style="margin-left: 10px;">Title:{{ paper.title }}</h1>
+            </div>
             <table>
                 <tr>
                     <th>Abstract:</th>
@@ -73,9 +79,13 @@
 </template>
 
 <script>
+import StarRating from 'vue-star-rating'
 import axios from 'axios'
 import { config } from "../../config";
 export default {
+    components: {
+        StarRating
+    },
     props: ['id'],
     data() {
         return {
@@ -91,7 +101,8 @@ export default {
                 user_id: '',
                 year: ''
             },
-            editMode: false
+            editMode: false,
+            rating: 0
         }
     },
     created() {
@@ -99,6 +110,17 @@ export default {
             .then(response => {
                 this.paper = response.data
                 console.log(this.paper)
+                axios.get(`${config.URL}:${config.PORT}/api/checkFavorite`,
+                    {
+                        params: {
+                            sessionToken: localStorage.getItem('sessionToken'),
+                            paperId: this.paper.ID,
+                        }
+                    })
+                    .then(response => {
+                        console.log(response.data)
+                        this.rating = response.data.rating
+                    })
             })
     },
     methods: {
@@ -186,6 +208,32 @@ export default {
                     console.log("編集APIでエラーが発生しました");
                     console.error(error);
                     alert("編集APIでエラーが発生しました")
+                });
+        },
+        async setRating(rating) {
+            this.rating = rating;
+            await axios
+                .post(
+                    `${config.URL}:${config.PORT}/api/favorite`,
+                    {
+                        sessionToken: localStorage.getItem('sessionToken'),
+                        paperId: this.paper.ID,
+                        rating: this.rating,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }
+                )
+                .then((response) => {
+                    console.log("favorite response", response);
+                    console.log("お気に入り編集が完了しました");
+                })
+                .catch((error) => {
+                    console.log("お気に入りAPIでエラーが発生しました");
+                    console.error(error);
+                    alert("お気に入りAPIでエラーが発生しました")
                 });
         },
     },

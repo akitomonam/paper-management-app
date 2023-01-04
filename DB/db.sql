@@ -26,6 +26,7 @@ CREATE TABLE favorites (
 id INT NOT NULL AUTO_INCREMENT,
 paper_id INT NOT NULL,
 user_id INT NOT NULL,
+rating INT NOT NULL,
 PRIMARY KEY (id),
 FOREIGN KEY (paper_id) REFERENCES papers (id),
 FOREIGN KEY (user_id) REFERENCES users (id));

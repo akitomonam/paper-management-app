@@ -51,9 +51,10 @@ type Papers struct {
 }
 
 type Favorites struct {
-	ID      int `db:"id"`
-	Paperid int `db:"paper_id"`
-	Userid  int `db:"user_id"`
+	ID       int `db:"id"`
+	Paper_id int `db:"paper_id"`
+	User_id  int `db:"user_id"`
+	Rating   int `db:"rating"`
 }
 
 type Keywords struct {
@@ -550,6 +551,105 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func apiFavoriteHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("apiFavoriteHandlerが呼び出されました")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
+
+	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
+	if r.Method == http.MethodOptions {
+		return
+	}
+
+	paper_id, err := strconv.Atoi(r.FormValue("paperId"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	session_token := r.FormValue("sessionToken")
+	rating, err := strconv.Atoi(r.FormValue("rating"))
+	if err != nil {
+		http.Error(w, "Invalid Year", http.StatusBadRequest)
+		return
+	}
+
+	//session_tokenからuser_idを取得
+	var session Sessions
+	db.Where("session_token = ?", session_token).First(&session)
+	if session.User_id == 0 {
+		http.Error(w, "Session Token is not found", http.StatusUnauthorized)
+		return
+	}
+	user_id := session.User_id
+
+	// favoritesテーブルに既にpaper_id、user_idと同じレコードがあった場合、そのレコードのratingを更新
+	var favorite Favorites
+	db.Where("paper_id = ? AND user_id = ?", paper_id, user_id).First(&favorite)
+	if favorite.ID != 0 {
+		favorite.Rating = rating
+		db.Save(&favorite)
+		return
+	}
+
+	// なかった場合、favoriteレコードを新規作成
+	favorite = Favorites{Paper_id: paper_id, User_id: user_id, Rating: rating}
+	db.Create(&favorite)
+
+	resp := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{
+		Success: true,
+		Message: "お気に入り登録に成功しました",
+	}
+	respBytes, _ := json.Marshal(resp)
+	w.Write(respBytes)
+}
+
+func apicheckFavoriteHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("apiFavoriteHandlerが呼び出されました")
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // POSTメソッドのみを許可する
+
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// クエリパラメータからセッショントークンとペーパーIDを取得する
+	session_token := r.URL.Query().Get("sessionToken")
+	paperIdStr := r.URL.Query().Get("paperId")
+	paper_id, _ := strconv.Atoi(paperIdStr)
+
+	//session_tokenからuser_idを取得
+	var session Sessions
+	db.Where("session_token = ?", session_token).First(&session)
+	if session.User_id == 0 {
+		http.Error(w, "Session Token is not found", http.StatusUnauthorized)
+		return
+	}
+	user_id := session.User_id
+
+	// favoritesテーブルからpaper_id、user_idを用いてratingを取得
+	var favorite Favorites
+	db.Where("paper_id = ? AND user_id = ?", paper_id, user_id).First(&favorite)
+	if favorite.ID == 0 {
+		favorite.Rating = 0
+	}
+
+	// favoriteレコードが見つかった場合は、ratingを返す
+	resp := struct {
+		Rating  int    `json:"rating"`
+		Message string `json:"message"`
+	}{
+		Rating:  favorite.Rating,
+		Message: "お気に入り登録確認成功",
+	}
+	respBytes, _ := json.Marshal(resp)
+	w.Write(respBytes)
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -563,6 +663,8 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/userlist", userlistHandler)
 	mux.HandleFunc("/api/papers/", apiPapersHandler)
 	mux.HandleFunc("/api/editpaperinfo", apiEditPaperInfoHandler)
+	mux.HandleFunc("/api/favorite", apiFavoriteHandler)
+	mux.HandleFunc("/api/checkFavorite", apicheckFavoriteHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
