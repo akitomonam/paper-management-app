@@ -6,9 +6,8 @@
                     <tr style="border: solid 1px #000">
                         <div class="drag-item">
                             <img src="../assets/drag_drop_button.png" class="handle" />
-                            {{ element.file_name }}
-                            <button @click="showFile(element.ID)">Preview</button>
-                            <button @click="deleteFile(element.ID)">Delete</button>
+                            <!-- {{ element.file_name }} -->
+                            <router-link :to="'/papers/' + element.ID">{{ element.file_name }}</router-link>
                         </div>
                     </tr>
                 </template>
@@ -18,9 +17,7 @@
 </template>
 
 <script>
-import axios from "axios";
 import draggable from "vuedraggable";
-import { config } from "../../config";
 export default {
     name: "FileTable",
     components: {
@@ -43,48 +40,6 @@ export default {
         this.localTables = this.tables;
     },
     methods: {
-        // tableをクリックした際に実行される処理
-        async showFile(targetFileId) {
-            console.log("click table!!!");
-            console.log("targetFileId", targetFileId); // 目的の文字列を出力する
-            // サーバーに保管されているファイルをプレビューする
-            axios
-                .get(
-                    `${config.URL}:${config.PORT}/api/preview?fileId=${targetFileId}`
-                )
-                .then((response) => {
-                    // プレビューするファイルのURLを取得する
-                    let filepath = response.data.fileUrl;
-                    // プレビューするファイルのURLをもとに、新しいタブを開く
-                    filepath = filepath.replace(/^\./, "");
-                    window.open(`${config.URL}:${config.PORT}${filepath}`, "_blank");
-                })
-                .catch((error) => {
-                    console.log("ファイルプレビューAPIでエラーが発生しました");
-                    console.error(error);
-                });
-        },
-        async deleteFile(targetFileId) {
-            console.log("targetFileId:", targetFileId)
-            if (confirm('本当に削除しますか？')) {
-                try {
-                    const response = await axios.get(`${config.URL}:${config.PORT}/api/delete?fileId=${targetFileId}`)
-                    if (response.data) { // レスポンスボディが存在する場合
-                        console.log("response.data", response.data);
-                        if (response.data.result == "true") {
-                            alert("ファイル削除に成功しました。")
-                            this.$emit('update-tables') // 親コンポーネントに発火
-                        } else {
-                            alert("ファイル削除に失敗しました。")
-                        }
-                    } else {
-                        console.error('レスポンスボディが存在しません')
-                    }
-                } catch {
-                    console.log('File delete Failed');
-                }
-            }
-        }
     },
     watch: {
         // tablesプロパティが更新されたら、localTablesも更新

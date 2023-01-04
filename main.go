@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"time"
 	"upload/file"
@@ -407,7 +408,6 @@ func userinfoHandler(w http.ResponseWriter, r *http.Request) {
 		File_path: userDb.File_path,
 	}
 
-	// ユーザー情報をすべて返す
 	res, err := json.Marshal(userInfo)
 	if err != nil {
 		fmt.Println("エラー(useInfo):", err)
@@ -456,6 +456,42 @@ func FindSession(sessionToken string) (Sessions, error) {
 	return session, nil
 }
 
+func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	// URL パスからパラメータを取得する
+	// URL パスの最後のセグメントを取得する
+	_, id := path.Split(r.URL.Path)
+
+	fmt.Println("id:", id)
+
+	// id を使って、DB から論文の詳細情報を取得する処理を記述する
+	var Paper Papers
+	if err := db.Where("id = ?", id).First(&Paper).Error; err != nil {
+		// http.Error(w, "レコードが見つかりません", http.StatusNotFound)
+		fmt.Println("レコードが見つかりません")
+		fmt.Println("レコードが見つかりません:", err)
+		// レスポンスを返す
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
+		return
+	}
+	// 論文の情報をすべて返す
+	res, err := json.Marshal(Paper)
+	if err != nil {
+		fmt.Println("エラー(Paper):", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	// mux.HandleFunc("/", indexHandler)
@@ -467,6 +503,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/signup", signupHandler)
 	mux.HandleFunc("/api/userinfo", userinfoHandler)
 	mux.HandleFunc("/api/userlist", userlistHandler)
+	mux.HandleFunc("/api/papers/", apiPapersHandler)
 	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {

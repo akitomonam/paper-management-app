@@ -40,6 +40,13 @@ const routes = [
         component: () =>
             import(/* webpackChunkName: "about" */ "../views/SignUpList"),
     },
+    {
+        path: "/papers/:id",
+        name: "PaperDetail",
+        props: true,
+        component: () =>
+            import(/* webpackChunkName: "about" */ "../views/PaperDetail"),
+    },
 ];
 
 const router = createRouter({
