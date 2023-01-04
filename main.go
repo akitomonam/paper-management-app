@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"time"
 	"upload/file"
@@ -147,6 +148,7 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
 	sessionToken := r.URL.Query().Get("sessionToken")
+	// sessionToken, _ = url.QueryUnescape(sessionToken)
 	fmt.Println("table-list-sessionToken:", sessionToken)
 
 	var fileDbs []Papers
@@ -314,6 +316,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	b := make([]byte, 32)
 	rand.Read(b)
 	token := base64.StdEncoding.EncodeToString(b)
+	token = removeSpecialCharacters(token)
 	// セッションにトークンを保存する(必要ないかも)
 	session.Values["token"] = token
 	session.Save(r, w)
@@ -344,6 +347,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	respBytes, _ := json.Marshal(resp)
 	w.Write(respBytes)
+}
+
+func removeSpecialCharacters(s string) string {
+	// +や-を除去するための正規表現
+	re := regexp.MustCompile(`[+-]`)
+	return re.ReplaceAllString(s, "")
 }
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
