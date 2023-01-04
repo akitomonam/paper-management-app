@@ -7,7 +7,10 @@
                         <div class="drag-item">
                             <img src="../assets/drag_drop_button.png" class="handle" />
                             <!-- {{ element.file_name }} -->
-                            <router-link :to="'/papers/' + element.ID">{{ element.file_name }}</router-link>
+                            <!-- <router-link :to="'/papers/' + element.ID">{{ element.file_name }}</router-link> -->
+                            <router-link :to="'/papers/' + element.ID">
+                                {{ element.title ? element.title : element.file_name }}
+                            </router-link>
                         </div>
                     </tr>
                 </template>
