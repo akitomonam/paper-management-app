@@ -1,6 +1,6 @@
 # 論文管理 WEB アプリ
 
-![image](https://user-images.githubusercontent.com/72239675/209828493-44812c03-32c5-42d7-884a-9789c88e2875.png)
+![demo](https://user-images.githubusercontent.com/72239675/210528954-489326a6-5e1d-4612-8b6f-cf472112d200.gif)
 
 # 仕様
 
