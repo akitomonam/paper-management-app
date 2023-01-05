@@ -1,17 +1,17 @@
 <!-- ログイン画面を表示するコンポーネント -->
 <template>
     <div>
-        <h1>Login</h1>
+        <h1>Login Page</h1>
         <form>
-            <label>ユーザー名:</label>
+            <label>username:</label>
             <input type="text" v-model="username" />
             <br />
-            <label>パスワード:</label>
+            <label>password:</label>
             <input type="password" v-model="password" />
             <br />
-            <button type="submit" @click.prevent="login">ログイン</button>
+            <button type="submit" @click.prevent="login">Login</button>
         </form>
-        <router-link to="/signup">サインアップ</router-link>
+        <router-link to="/signup">signup</router-link>
     </div>
 </template>
 

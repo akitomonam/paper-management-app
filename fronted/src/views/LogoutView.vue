@@ -1,8 +1,8 @@
 <template>
     <div>
-        <h1>Logout</h1>
+        <h1>Logout Page</h1>
         <!-- ログアウトボタンを表示する -->
-        <button @click="logout">ログアウト</button>
+        <button @click="logout">logout</button>
     </div>
 </template>
 <script>

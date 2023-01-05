@@ -1,11 +1,11 @@
 <template>
     <div class="sidebar" v-bind:class="{ open: isOpen }">
         <ul>
-            <li><router-link to="/">ホーム</router-link></li>
-            <li><router-link to="/mypage">マイページ</router-link></li>
-            <li><router-link to="/login">ログイン</router-link></li>
-            <li><router-link to="/logout">ログアウト</router-link></li>
-            <li><router-link to="/SignUplist">ユーザーリスト</router-link></li>
+            <li><router-link to="/">Home</router-link></li>
+            <li><router-link to="/mypage">My Page</router-link></li>
+            <li><router-link to="/login">Login</router-link></li>
+            <li><router-link to="/logout">Logout</router-link></li>
+            <li><router-link to="/SignUplist">User List</router-link></li>
         </ul>
     </div>
 </template>

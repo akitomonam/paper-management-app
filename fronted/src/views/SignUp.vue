@@ -1,14 +1,14 @@
 <template>
     <div>
-        <h1>ユーザー登録</h1>
+        <h1>User Registration Page</h1>
         <form>
-            <label for="username">ユーザー名</label>
+            <label for="username">username</label>
             <input type="text" v-model="username" id="username" />
             <br />
-            <label for="password">パスワード</label>
+            <label for="password">password</label>
         <input type="password" v-model="password" id="password" />
         <br />
-        <button @click.prevent="signup">サインアップ</button>
+        <button @click.prevent="signup">signup</button>
     </form>
 </div>
 </template>

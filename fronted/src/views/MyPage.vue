@@ -1,11 +1,11 @@
 <template>
     <div>
-        <h1>マイページ</h1>
+        <h1>My Page</h1>
         <div>
-            <h2>プロフィール情報</h2>
+            <h2>Profile Info</h2>
             <div>
-                <img src="{{ user.avatarUrl }}" alt="アバター画像" />
-                <p>ユーザー名:{{ user.name }}</p>
+                <img src="{{ user.avatarUrl }}" alt="Profile Image" />
+                <p>username:{{ user.name }}</p>
                 <p>{{ user.description }}</p>
             </div>
         </div>
@@ -16,33 +16,32 @@
             <FileTable :tables="favorite_tables" @update-tables="updateTables(true)" />
         </div>
         <div>
-            <h2>設定の編集</h2>
+            <h2>Edit Settings</h2>
             <form>
                 <label>
-                    プロフィール画像:
+                    Profile Image:
                     <input type="file" @change="onProfileFileChange" />
                 </label>
                 <br />
                 <label>
-                    ユーザー名:
+                    username:
                     <input type="text" v-model="user.name" />
                 </label>
                 <br />
                 <label>
-                    自己紹介文:
+                    self-introductory statement:
                     <textarea v-model="user.description"></textarea>
                 </label>
                 <br />
-                <button type="submit">保存</button>
+                <button type="submit">Save</button>
             </form>
         </div>
         <div>
-            <h2>アカウントの管理</h2>
-            <button @click="deleteAccount">アカウントを削除する</button>
-            <button v-if="user.isLocked" @click="unlockAccount">アカウントをアンロックする</button>
-            <button v-else @click="lockAccount">アカウントをロックする</button>
+            <h2>Account Management</h2>
+            <button @click="deleteAccount">Delete account</button>
+            <button v-if="user.isLocked" @click="unlockAccount">Unlock account</button>
+            <button v-else @click="lockAccount">Lock account</button>
         </div>
-        <button v-on:click="checkSessionToken">セッショントークン確認</button>
     </div>
 </template>
 
@@ -96,10 +95,6 @@ export default {
                 this.user.avatarUrl = e.target.result;
             };
             reader.readAsDataURL(file);
-        },
-        checkSessionToken() {
-            const sessionToken = localStorage.getItem('sessionToken');
-            console.log("sessionToken:",sessionToken)
         },
         getUsersDB: function () {
             const sessionToken = localStorage.getItem('sessionToken');

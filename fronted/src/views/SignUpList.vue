@@ -1,7 +1,7 @@
 <template>
     <!-- tablesリスト中の辞書に含まれるnameを一覧表示する -->
     <div>
-        <h1>登録ユーザ一覧</h1>
+        <h1>Registered Users List</h1>
         <li v-for="table in tables" :key="table">
             {{ table.Username }}
         </li>
