@@ -155,6 +155,7 @@ export default {
                         if (response.data.result == "true") {
                             alert("ファイル削除に成功しました。")
                             this.$emit('update-tables') // 親コンポーネントに発火
+                            this.$router.back()
                         } else {
                             alert("ファイル削除に失敗しました。")
                         }
