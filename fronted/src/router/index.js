@@ -6,13 +6,11 @@ const routes = [
         path: "/",
         name: "home",
         component: PaperManagement,
+        meta: { requiresAuth: true },
     },
     {
         path: "/login",
         name: "LoginView",
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
         component: () =>
             import(/* webpackChunkName: "about" */ "../views/LoginView"),
     },
@@ -21,18 +19,19 @@ const routes = [
         name: "LogOut",
         component: () =>
             import(/* webpackChunkName: "about" */ "../views/LogoutView"),
+        meta: { requiresAuth: true },
     },
     {
         path: "/mypage",
         name: "MyPage",
-        component: () =>
-            import(/* webpackChunkName: "about" */ "../views/MyPage"),
+        component: () => import(/* webpackChunkName: "about" */ "../views/MyPage"),
+        meta: { requiresAuth: true },
     },
     {
         path: "/signup",
         name: "SignUp",
-        component: () =>
-            import(/* webpackChunkName: "about" */ "../views/SignUp"),
+        component: () => import(/* webpackChunkName: "about" */ "../views/SignUp"),
+        meta: { requiresAuth: true },
     },
     {
         path: "/SignUplist",
@@ -46,13 +45,20 @@ const routes = [
         props: true,
         component: () =>
             import(/* webpackChunkName: "about" */ "../views/PaperDetail"),
+        meta: { requiresAuth: true },
     },
 ];
 
 const router = createRouter({
-    // history: createWebHistory(process.env.BASE_URL),
     history: createWebHistory(process.env.BASE_URL),
     routes,
 });
 
+router.beforeEach((to) => {
+    const sessionToken = localStorage.getItem('sessionToken')
+    if (to.meta.requiresAuth && sessionToken == null) {
+        alert("ログインしてください")
+        return { name: "LoginView" };
+    }
+});
 export default router;
