@@ -13,6 +13,17 @@ const routes = [
         name: "LoginView",
         component: () =>
             import(/* webpackChunkName: "about" */ "../views/LoginView"),
+        beforeEnter(to, from, next) {
+            // ここでセッショントークンを確認する
+            const sessionToken = localStorage.getItem('sessionToken')
+            console.log("sessionToken:", !!sessionToken)
+            if (sessionToken) {
+                alert("既にログインしています")
+                from()
+            } else {
+                next()
+            }
+        }
     },
     {
         path: "/logout",
@@ -31,7 +42,6 @@ const routes = [
         path: "/signup",
         name: "SignUp",
         component: () => import(/* webpackChunkName: "about" */ "../views/SignUp"),
-        meta: { requiresAuth: true },
     },
     {
         path: "/SignUplist",
