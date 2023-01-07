@@ -10,6 +10,9 @@
             </div>
         </div>
         <div>
+            <UploadForm @update-upload-status="updateTables" />
+        </div>
+        <div>
             <h2>My Uploaded File List</h2>
             <FileTable :tables="tables" @update-tables="updateTables" />
             <h2>My Favorite File List</h2>
@@ -48,11 +51,13 @@
 <script>
 import axios from "axios";
 import { config } from "../../config";
+import UploadForm from "../components/UploadForm.vue";
 import FileTable from "../components/FileTable.vue";
 
 export default {
     name: "MyPage",
     components: {
+        UploadForm,
         FileTable,
     },
     data() {
