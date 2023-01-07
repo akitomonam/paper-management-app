@@ -1,23 +1,12 @@
 <template>
     <div>
-        <h1>My Page</h1>
         <div>
-            <h2>Profile Info</h2>
-            <div>
-                <img src="{{ user.avatarUrl }}" alt="Profile Image" />
-                <p>username:{{ user.name }}</p>
-                <p>{{ user.description }}</p>
-            </div>
+            <UserProfileInfo :user="user" />
         </div>
         <div>
             <UploadForm @update-upload-status="updateTables" />
         </div>
-        <div>
-            <h2>My Uploaded File List</h2>
-            <FileTable :tables="tables" @update-tables="updateTables" />
-            <h2>My Favorite File List</h2>
-            <FileTable :tables="favorite_tables" @update-tables="updateTables(true)" />
-        </div>
+        <UserPaperTableInfo ref="tables"/>
         <div>
             <h2>Edit Settings</h2>
             <form>
@@ -51,14 +40,16 @@
 <script>
 import axios from "axios";
 import { config } from "../../config";
+import UserProfileInfo from '../components/UserProfileInfo.vue'
 import UploadForm from "../components/UploadForm.vue";
-import FileTable from "../components/FileTable.vue";
+import UserPaperTableInfo from "../components/UserPaperTableInfo.vue";
 
 export default {
     name: "MyPage",
     components: {
+        UserProfileInfo,
         UploadForm,
-        FileTable,
+        UserPaperTableInfo,
     },
     data() {
         return {
@@ -68,14 +59,10 @@ export default {
                 description: '',
                 isLocked: false,
             },
-            tables: [],
-            favorite_tables: []
         }
     },
     created() {
         this.getUsersDB()
-        this.updateTables()
-        this.updateTables(true)
     },
     methods: {
         deleteAccount() {
@@ -110,19 +97,8 @@ export default {
                 console.log("user.name:", this.user.name)
             });
         },
-        updateTables(favorite=false) {
-            // 子コンポーネントから受け取ったデータを、tablesプロパティにセット
-            this.getDB(favorite);
-        },
-        getDB: function (favorite) {
-            const sessionToken = localStorage.getItem('sessionToken');
-            axios.get(`${config.URL}:${config.PORT}/api/tables?sessionToken=${sessionToken}&favorite=${favorite}`).then((res) => {
-                if (favorite) {
-                    this.favorite_tables = res.data
-                } else {
-                    this.tables = res.data;
-                }
-            });
+        updateTables(favorite = false) {
+            this.$refs.tables.updateTables(favorite)
         },
     },
 }
