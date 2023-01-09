@@ -52,28 +52,3 @@ export default {
     },
 }
 </script>
-
-<style>
-h1 {
-    text-align: center;
-}
-
-div {
-    margin: 20px;
-}
-
-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-li {
-    margin: 10px 0;
-}
-</style>

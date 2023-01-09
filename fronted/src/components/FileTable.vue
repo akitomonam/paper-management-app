@@ -53,7 +53,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 /* アップロード済みファイル一覧を装飾する */
 table {
     border-collapse: collapse;
