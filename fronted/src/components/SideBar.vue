@@ -1,96 +1,100 @@
 <template>
-    <div class="sidebar" v-bind:class="{ open: isOpen }">
-        <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li><router-link to="/mypage">My Page</router-link></li>
-            <li><router-link to="/login">Login</router-link></li>
-            <li><router-link to="/logout">Logout</router-link></li>
-            <li><router-link to="/SignUplist">User List</router-link></li>
-        </ul>
-    </div>
+    <Slide noOverlay>
+        <router-link to="/">Home</router-link>
+        <router-link to="/mypage">My Page</router-link>
+        <router-link to="/login">Login</router-link>
+        <router-link to="/logout">Logout</router-link>
+        <router-link to="/SignUplist">User List</router-link>
+    </Slide>
 </template>
 
 <script>
+import { Slide } from 'vue3-burger-menu'
 export default {
     name: "SideBar",
-    props: {
-        // App.vueからisOpenを受け取るプロパティを定義
-        isOpen: {
-            type: Boolean,
-            required: true,
-        },
-    },
-    methods: {
-        changeOpen() {
-            // App.vueにchangeOpenイベントを発行する
-            this.$emit("changeOpen");
-        },
-    },
+    components: {
+        Slide
+    }
 }
 </script>
 
 <style>
-.sidebar {
-    /* サイドバーのスタイルをここに記述 */
-    width: 200px;
-    /* サイドバーの幅を200pxに指定 */
+.bm-burger-button {
     position: fixed;
-    /* サイドバーを固定表示にする */
-    top: 0;
-    /* サイドバーをページの上部に配置する */
-    bottom: 0;
-    /* サイドバーをページの下部まで伸ばす */
-    right: 0;
-    /* サイドバーをページの右側に配置する */
-    background-color: #f5f5f5;
-    /* サイドバーの背景色を指定 */
-    z-index: 1;
-    /* サイドバーを前面に表示する */
-    /* サイドバーを非表示にするためのスタイルを追加 */
-    transform: translateX(200px);
-    transition: transform 0.3s;
-}
-
-.sidebar.open {
-    /* openクラスが追加された場合、サイドバーを表示する */
-    transform: translateX(0);
-}
-
-.sidebar ul {
-    /* リストのスタイルをここに記述 */
-    list-style: none;
-    /* リストのマーカーを非表示にする */
-    margin: 0;
-    /* リストのマージンを0にする */
-    padding: 0;
-    /* リストのパディングを0にする */
-}
-
-.sidebar li {
-    /* リストアイテムのスタイルをここに記述 */
-    border-bottom: 1px solid #ddd;
-    /* リストアイテムの間に区切り線を表示する */
-}
-
-.sidebar a {
-    /* リンクのスタイルをここに記述 */
-    display: block;
-    /* リンクをブロック要素として表示する */
-    padding: 8px;
-    /* リンクのパディングを8pxにする */
-    text-decoration: none;
-    /* リンクの下線を非表示にする */
-    color: #333;
-    /* リンクの文字色を#333にする */
-    font-size: 14px;
-    /* リンクの文字サイズを14pxにする */
-}
-
-.sidebar a:hover {
-    /* リンクをホバーしたときのスタイルをここに記述 */
-    background-color: #eee;
-    /* リンクをホバーしたときの背景色を#eeeにする */
+    width: 36px;
+    height: 30px;
+    left: 36px;
+    top: 36px;
     cursor: pointer;
-    /* マウスカーソルをポインターにする */
+}
+
+.bm-burger-bars {
+    background-color: #373a47;
+}
+
+.line-style {
+    position: absolute;
+    height: 20%;
+    left: 0;
+    right: 0;
+}
+
+.cross-style {
+    position: absolute;
+    top: 12px;
+    right: 2px;
+    cursor: pointer;
+}
+
+.bm-cross {
+    background: #bdc3c7;
+}
+
+.bm-cross-button {
+    height: 24px;
+    width: 24px;
+}
+
+.bm-menu {
+    height: 100%;
+    /* 100% Full-height */
+    width: 0;
+    /* 0 width - change this with JavaScript */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1000;
+    /* Stay on top */
+    top: 0;
+    left: 0;
+    background-color: rgba(84, 84, 84, 0.76);
+    /* Black*/
+    overflow-x: hidden;
+    /* Disable horizontal scroll */
+    padding-top: 60px;
+    /* Place content 60px from the top */
+    transition: 0.5s;
+    /*0.5 second transition effect to slide in the sidenav*/
+}
+
+.bm-overlay {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.bm-item-list {
+    color: #b8b7ad;
+    margin-left: 10%;
+    font-size: 20px;
+}
+
+.bm-item-list>* {
+    display: flex;
+    text-decoration: none;
+    padding: 0.7em;
+}
+
+.bm-item-list>*>span {
+    margin-left: 10px;
+    font-weight: 700;
+    color: white;
 }
 </style>
