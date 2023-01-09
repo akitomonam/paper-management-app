@@ -241,7 +241,11 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+table {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
 .preview-button {
     color: white;
     background-color: rgb(88, 88, 226);
