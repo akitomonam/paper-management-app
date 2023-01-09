@@ -1,30 +1,40 @@
 <template>
-    <table>
-        <div class="draggable-container">
-            <draggable v-model="localTables" group="people" item-key="ID" handle=".handle">
-                <template #item="{ element }">
-                    <tr style="border: solid 1px #000">
-                        <div class="drag-item">
-                            <img src="../assets/drag_drop_button.png" class="handle" />
-                            <!-- {{ element.file_name }} -->
-                            <!-- <router-link :to="'/papers/' + element.ID">{{ element.file_name }}</router-link> -->
-                            <router-link :to="'/papers/' + element.ID">
-                                {{ element.title ? element.title : element.file_name }}
-                            </router-link>
-                        </div>
-                    </tr>
-                </template>
-            </draggable>
-        </div>
-    </table>
+    <div>
+        <!-- <table>
+            <div class="draggable-container">
+                <draggable v-model="localTables" group="people" item-key="ID" handle=".handle">
+                    <template #item="{ element }">
+                        <tr style="border: solid 1px #000">
+                            <div class="drag-item">
+                                <img src="../assets/drag_drop_button.png" class="handle" />
+                                <router-link :to="'/papers/' + element.ID">
+                                    {{ element.title ? element.title : element.file_name }}
+                                </router-link>
+                            </div>
+                        </tr>
+                    </template>
+                </draggable>
+            </div>
+        </table> -->
+        <vue-good-table :columns="columns" :rows="localTables" :search-options="{
+            enabled: true,
+            skipDiacritics: true,
+            // searchFn: mySearchFn,
+            placeholder: 'Search this table',
+            // externalQuery: searchQuery
+        }" v-on:row-click="onRowClick"/>
+    </div>
 </template>
 
 <script>
-import draggable from "vuedraggable";
+// import draggable from "vuedraggable";
+import 'vue-good-table-next/dist/vue-good-table-next.css'
+import { VueGoodTable } from 'vue-good-table-next';
 export default {
     name: "FileTable",
     components: {
-        draggable,
+        // draggable,
+        VueGoodTable
     },
     props: {
         tables: {
@@ -34,15 +44,42 @@ export default {
     },
     data() {
         return {
-            // プロパティを変更するためのデータプロパティを用意
-            // 初期値は、propsから受け取った値を設定
             localTables: this.tables,
+            columns: [
+                {
+                    label: 'ID',
+                    field: 'ID',
+                },
+                {
+                    label: 'Title',
+                    field: 'title',
+                },
+                {
+                    label: 'author',
+                    field: 'author',
+                },
+                {
+                    label: 'publisher',
+                    field: 'publisher',
+                },
+                {
+                    label: 'year',
+                    field: 'year',
+                },
+                {
+                    label: 'Filename',
+                    field: 'file_name',
+                },
+            ],
         };
     },
     created() {
         this.localTables = this.tables;
     },
     methods: {
+        onRowClick(params) {
+            this.$router.push({ path: '/papers/' + params.row.ID });
+        }
     },
     watch: {
         // tablesプロパティが更新されたら、localTablesも更新
@@ -55,7 +92,8 @@ export default {
 
 <style scoped>
 /* アップロード済みファイル一覧を装飾する */
-table {
+
+/* table {
     border-collapse: collapse;
     margin: 0 auto;
 }
@@ -66,7 +104,7 @@ tr:nth-child(even) {
 
 tr:hover {
     background-color: #ddd;
-}
+} */
 
 .handle {
     /* background: #3d3c3c17; */
