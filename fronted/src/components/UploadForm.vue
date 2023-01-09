@@ -32,12 +32,6 @@ export default {
         },
         async uploadFile() {
             const sessionToken = localStorage.getItem('sessionToken');
-            console.log("sessionToken:", sessionToken)
-            if (!sessionToken) {
-                alert("ログイン後にアップロードしてください")
-                return
-            }
-
             this.isUploading = true; // アップロード開始時に、アップロード中のステータスを表すデータプロパティを true に設定する
             const file = this.$refs.fileInput.files[0];
             const formData = new FormData();
@@ -50,7 +44,7 @@ export default {
                     },
                 })
                 if (response.data) { // レスポンスボディが存在する場合
-                    alert("ファイルアップロード完了\n" + "ファイル名:" + response.data.filename)
+                    // alert("ファイルアップロード完了\n" + "ファイル名:" + response.data.filename)
                     this.$refs.fileInput.value = ''; // ファイル入力欄をリセット
                     this.isButtonDisabled = true; // アップロード完了後はボタンを disabled 状態にする
                     this.isUploading = false; // アップロード完了後に、アップロード中のステータスを表すデータプロパティを false に設定する
@@ -59,9 +53,11 @@ export default {
                 } else {
                     this.isUploading = false; // アップロード完了後に、アップロード中のステータスを表すデータプロパティを false に設定する
                     console.error('レスポンスボディが存在しません')
+                    alert("アップロードエラーが発生しました")
                 }
             } catch (error) {
                 this.isUploading = false; // アップロード完了後に、アップロード中のステータスを表すデータプロパティを false に設定する
+                alert("アップロードエラーが発生しました")
                 console.log('File uploaded Failed');
                 console.error(error);
             }

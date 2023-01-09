@@ -153,7 +153,7 @@ export default {
                     if (response.data) { // レスポンスボディが存在する場合
                         console.log("response.data", response.data);
                         if (response.data.result == "true") {
-                            alert("ファイル削除に成功しました。")
+                            // alert("ファイル削除に成功しました。")
                             this.$emit('update-tables') // 親コンポーネントに発火
                             this.$router.back()
                         } else {

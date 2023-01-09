@@ -43,7 +43,7 @@ export default {
                     // If the login is successful, store the session token in local storage
                     console.log("response.data.token:", response.data.token)
                     localStorage.setItem('sessionToken', response.data.token);
-                    alert(response.data.message);
+                    // alert(response.data.message);
                     // マイページ画面に遷移する
                     this.$router.push({ path: '/mypage' });
                 } else {
