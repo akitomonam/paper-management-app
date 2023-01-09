@@ -2,8 +2,8 @@
   <div>
     <HeaderComponent />
     <SideBar/>
-    <FooterComponent />
     <router-view />
+    <FooterComponent />
   </div>
 </template>
 
