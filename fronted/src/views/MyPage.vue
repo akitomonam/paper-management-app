@@ -1,39 +1,9 @@
 <template>
     <div>
-        <div>
-            <UserProfileInfo :user="user" />
-        </div>
-        <div>
-            <UploadForm @update-upload-status="updateTables" />
-        </div>
-        <UserPaperTableInfo ref="tables"/>
-        <div>
-            <h2>Edit Settings</h2>
-            <form>
-                <label>
-                    Profile Image:
-                    <input type="file" @change="onProfileFileChange" />
-                </label>
-                <br />
-                <label>
-                    username:
-                    <input type="text" v-model="user.name" />
-                </label>
-                <br />
-                <label>
-                    self-introductory statement:
-                    <textarea v-model="user.description"></textarea>
-                </label>
-                <br />
-                <button type="submit">Save</button>
-            </form>
-        </div>
-        <div>
-            <h2>Account Management</h2>
-            <button @click="deleteAccount">Delete account</button>
-            <button v-if="user.isLocked" @click="unlockAccount">Unlock account</button>
-            <button v-else @click="lockAccount">Lock account</button>
-        </div>
+        <UserProfileInfo :user="user" />
+        <UploadForm @update-upload-status="updateTables" />
+        <UserPaperTableInfo ref="tables" />
+        <UserPrifileInfoEdit :user="user" />
     </div>
 </template>
 
@@ -43,6 +13,7 @@ import { config } from "../../config";
 import UserProfileInfo from '../components/UserProfileInfo.vue'
 import UploadForm from "../components/UploadForm.vue";
 import UserPaperTableInfo from "../components/UserPaperTableInfo.vue";
+import UserPrifileInfoEdit from "../components/UserPrifileInfoEdit.vue";
 
 export default {
     name: "MyPage",
@@ -50,6 +21,7 @@ export default {
         UserProfileInfo,
         UploadForm,
         UserPaperTableInfo,
+        UserPrifileInfoEdit
     },
     data() {
         return {
@@ -65,29 +37,6 @@ export default {
         this.getUsersDB()
     },
     methods: {
-        deleteAccount() {
-            // アカウントを削除する処理を記述する
-        },
-        lockAccount() {
-            this.user.isLocked = true;
-            // アカウントをロックする処理を記述する
-        },
-        unlockAccount() {
-            this.user.isLocked = false;
-            // アカウントをアンロックする処理を記述する
-        },
-        onFileChange(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.user.avatarUrl = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        },
         getUsersDB: function () {
             const sessionToken = localStorage.getItem('sessionToken');
             console.log("sessionToken:", sessionToken)
