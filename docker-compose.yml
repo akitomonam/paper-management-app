@@ -3,7 +3,7 @@ services:
 
   # Go Server
   server:
-    build: 
+    build:
       context: ./server
       dockerfile: Dockerfile
     container_name: vgs-server
@@ -27,6 +27,7 @@ services:
     volumes:
       - ./client:/usr/src/app/client
       - .git:/usr/src/app/.git
+    command: sh -c "cd /usr/src/app/client/Vue3 && npm install && npm run build && npm run serve"
   # DB
   db:
     build:
