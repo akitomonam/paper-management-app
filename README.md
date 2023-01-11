@@ -14,32 +14,10 @@
 - アップロード済みファイルにコメント
 - お気に入り機能
 
-# 環境構築
-
-Go をインストール
-
-```
-sudo apt install golang
-go version
-```
-
-MySQL をインストール
-
-```
-sudo apt install mysql-server
-sudo service mysql start
-sudo service mysql status
-```
-
-Vue のインストール
-
 # 実行
 
 ```
-cd ./fronted
-npm run serve
-cd ..
-go run main.go
+docker-compose up -d
 ```
 
 # 検証環境
