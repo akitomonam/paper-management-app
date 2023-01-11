@@ -175,7 +175,7 @@ func sqlConnect() (database *gorm.DB, err error) {
 	DBMS := "mysql"
 	USER := "root"
 	PASS := "sdkogaken"
-	PROTOCOL := "tcp(localhost:3306)"
+	PROTOCOL := "tcp(vgs-db)"
 	DBNAME := "test_database"
 
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"

@@ -2,7 +2,7 @@
     "dbms": "mysql",
     "user": "hoge",
     "pass": "fuga",
-    "server": "tcp(localhost:3306)",
+    "server": "tcp(vgs-db)",
     "dbname": "hogefuga_database",
     "go_port":":12345"
 }

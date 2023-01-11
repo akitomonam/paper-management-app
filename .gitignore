@@ -1,2 +1,5 @@
 uploadfiles
 db_config.json
+.env
+*mysql-store
+*mysql-logs
