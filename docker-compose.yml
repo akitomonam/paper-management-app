@@ -1,37 +1,15 @@
 version: '3'
 services:
 
-  # Go Server
-  server:
-    build: 
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: vgs-server
-    ports:
-      - 12345:12345
-    tty: true # コンテナの起動永続化
-    volumes:
-      - ./server:/go/src/github.com/akitomonam/paper-management-app/server
-      - .git:/go/src/github.com/akitomonam/paper-management-app/.git
-    depends_on:
-      - 'db'
-  # client
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: vgs-client
-    ports:
-      - 8080:8080
-    tty: true # コンテナの起動永続化
-    volumes:
-      - ./client:/usr/src/app/client
-      - .git:/usr/src/app/.git
   # DB
   db:
     build:
-      context: ./db
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./db/Dockerfile
+      args:
+        UID: $UID
+        GID: $GID
+        UNAME: $UNAME
     container_name: vgs-db
     ports:
       - 3306:3306
@@ -44,3 +22,37 @@ services:
     volumes:
       - ./db/mysql-store:/var/lib/mysql  # データ永続化
       - ./db/mysql-logs:/var/log/mysql
+  # Go Server
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+      args:
+        UID: $UID
+        GID: $GID
+        UNAME: $UNAME
+    container_name: vgs-server
+    ports:
+      - 12345:12345
+    tty: true # コンテナの起動永続化
+    volumes:
+      - ./server:/go/src/github.com/akitomonam/paper-management-app/server
+      - .git:/go/src/github.com/akitomonam/paper-management-app/.git
+    depends_on:
+      - 'db'
+  # client
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+      args:
+        UID: $UID
+        GID: $GID
+        UNAME: $UNAME
+    container_name: vgs-client
+    ports:
+      - 8080:8080
+    tty: true # コンテナの起動永続化
+    volumes:
+      - ./client:/usr/src/app/client
+      - .git:/usr/src/app/.git
