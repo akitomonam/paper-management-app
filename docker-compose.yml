@@ -4,14 +4,14 @@ services:
   # Go Server
   server:
     build:
-      context: ./server
+      context: ./server/backend_go
       dockerfile: Dockerfile
     container_name: vgs-server
     ports:
       - 12345:12345
     tty: true # コンテナの起動永続化
     volumes:
-      - ./server:/go/src/github.com/akitomonam/paper-management-app/server
+      - ./server/backend_go:/go/src/github.com/akitomonam/paper-management-app/server
       - .git:/go/src/github.com/akitomonam/paper-management-app/.git
     depends_on:
       - 'db'
