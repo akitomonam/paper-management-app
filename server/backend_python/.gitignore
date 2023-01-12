@@ -4,3 +4,4 @@ out
 .gitconfig
 grobid_client_python
 .vscode-server
+config.json
