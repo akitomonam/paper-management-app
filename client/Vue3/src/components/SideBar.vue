@@ -66,7 +66,7 @@ export default {
     /* Stay on top */
     top: 0;
     left: 0;
-    background-color: rgba(84, 84, 84, 0.76);
+    background-color: rgb(139, 137, 137);
     /* Black*/
     overflow-x: hidden;
     /* Disable horizontal scroll */
@@ -81,7 +81,7 @@ export default {
 }
 
 .bm-item-list {
-    color: #b8b7ad;
+    color: #181818;
     margin-left: 10%;
     font-size: 20px;
 }
