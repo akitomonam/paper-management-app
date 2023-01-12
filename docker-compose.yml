@@ -15,6 +15,37 @@ services:
       - .git:/go/src/github.com/akitomonam/paper-management-app/.git
     depends_on:
       - 'db'
+  # grobid server
+  grobidserver:
+    build:
+      context: ./server/backend_grobid
+      dockerfile: Dockerfile
+    container_name: vgs-backend-grobid
+    ports:
+      - 8070:8070
+    working_dir: '/opt/grobid'
+    tty: true # コンテナの起動永続化
+    volumes:
+      - ./server/backend_grobid:/root
+      - .git:/root/.git
+    runtime: nvidia
+  # backend python
+  backendpython:
+    build:
+      context: ./server/backend_python
+      dockerfile: Dockerfile
+    container_name: vgs-backend-python
+    ports:
+      - 12340:12340
+    working_dir: '/root/'
+    tty: true # コンテナの起動永続化
+    volumes:
+      - ./server/backend_python:/root
+      - .git:/root/.git
+    # command: sh -c "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install"
+    # とりあえずコンテナが停止しないように「tail -f /dev/null」
+    entrypoint: ["sh", "-c", "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install && tail -f /dev/null"]
+    # stdin_open: true
   # client
   client:
     build:
