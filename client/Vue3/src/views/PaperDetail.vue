@@ -76,6 +76,7 @@
         <button class="preview-button" @click="showFile(paper.ID)">Preview</button>
         <button class="delete-button" @click="deleteFile(paper.ID)">Delete</button>
         <!-- <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button> -->
+        <CommentComponent />
         <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
     </div>
 </template>
@@ -84,9 +85,11 @@
 import StarRating from 'vue-star-rating'
 import VueElementLoading from "vue-element-loading";
 import axios from 'axios'
+import CommentComponent from '../components/CommentComponent.vue'
 import { config } from "../../config";
 export default {
     components: {
+        CommentComponent,
         StarRating,
         VueElementLoading
     },

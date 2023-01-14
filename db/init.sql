@@ -45,6 +45,14 @@ paper_id INT NOT NULL,
 keyword VARCHAR(255) NOT NULL,
 PRIMARY KEY (id));
 
+CREATE TABLE comments (
+id INT NOT NULL AUTO_INCREMENT,
+paper_id INT NOT NULL,
+user_id INT NOT NULL,
+content TEXT NOT NULL,
+created_at DATETIME NOT NULL,
+PRIMARY KEY (id));
+
 CREATE TABLE sessions (
 session_token CHAR(128) NOT NULL,
 user_id INT NOT NULL,
