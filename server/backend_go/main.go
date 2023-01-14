@@ -13,9 +13,11 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 	"upload/file"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
 )
@@ -245,6 +247,66 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("finish deletefile")
 }
 
+// bibTex情報取得
+func apiGetBibTexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
+	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
+	fmt.Println("apiGetBibTexHandler has been called")
+
+	title := r.URL.Query().Get("title")
+	fmt.Println("title:", title)
+	bibtex_info := getBibTeXInfo(title)
+	fmt.Println("bibtex_info:", bibtex_info)
+}
+
+// bibTex情報取得
+func getBibTeXInfo(title string) string {
+	bibtex_info := ""
+	// Search for papers on Google Scholar
+	fmt.Println("query:https://scholar.google.co.jp/scholar?q=" + title)
+	resp, err := http.Get("https://scholar.google.co.jp/scholar?q=" + title)
+	if err != nil {
+		fmt.Println("Error searching Google Scholar:", err)
+		return ""
+	}
+	defer resp.Body.Close()
+	fmt.Println("resp.Body:", resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("body:", body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return ""
+	}
+	// Use goquery to parse the HTML and find the citation links
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(body)))
+	if err != nil {
+		fmt.Println("Error parsing HTML:", err)
+		return ""
+	}
+	fmt.Println("doc:", doc)
+
+	doc.Find("a.gs_citi").Each(func(i int, s *goquery.Selection) {
+		href, exists := s.Attr("href")
+		if exists {
+			// Follow the citation link and get the BibTeX
+			resp, err := http.Get(href)
+			if err != nil {
+				fmt.Println("Error getting BibTeX:", err)
+				return
+			}
+			defer resp.Body.Close()
+			bibtex, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Error reading BibTeX:", err)
+				return
+			}
+			fmt.Println(string(bibtex))
+			bibtex_info = string(bibtex)
+		}
+	})
+	return string(bibtex_info)
+}
+
 // pdfのプレビュー処理
 func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiPreviewHandlerが呼び出されました")
@@ -253,7 +315,7 @@ func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 
 	// ファイル名を取得する
-	fileId, err := strconv.Atoi(r.URL.Query().Get("fileId"))
+	fileId, _ := strconv.Atoi(r.URL.Query().Get("fileId"))
 	fmt.Println("クリックしたファイルのID:", fileId)
 
 	// ファイルのURLを取得する
@@ -672,18 +734,19 @@ func apicheckFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload/file", uploadHandler)
-	mux.HandleFunc("/api/delete", deleteFileHandler)
-	mux.HandleFunc("/api/tables", apiTablesHandler)
-	mux.HandleFunc("/api/preview", apiPreviewHandler)
-	mux.HandleFunc("/api/login", loginHandler)
 	mux.HandleFunc("/api/signup", signupHandler)
-	mux.HandleFunc("/api/userinfo", userinfoHandler)
-	mux.HandleFunc("/api/userlist", userlistHandler)
+	mux.HandleFunc("/api/login", loginHandler)
+	mux.HandleFunc("/upload/file", uploadHandler)
+	mux.HandleFunc("/api/tables", apiTablesHandler)
 	mux.HandleFunc("/api/papers/", apiPapersHandler)
 	mux.HandleFunc("/api/editpaperinfo", apiEditPaperInfoHandler)
+	mux.HandleFunc("/api/getBibTeX", apiGetBibTexHandler)
 	mux.HandleFunc("/api/favorite", apiFavoriteHandler)
 	mux.HandleFunc("/api/checkFavorite", apicheckFavoriteHandler)
+	mux.HandleFunc("/api/preview", apiPreviewHandler)
+	mux.HandleFunc("/api/delete", deleteFileHandler)
+	mux.HandleFunc("/api/userinfo", userinfoHandler)
+	mux.HandleFunc("/api/userlist", userlistHandler)
 	mux.Handle("/mnt/uploadfiles/", http.StripPrefix("/mnt/uploadfiles", http.FileServer(http.Dir("/mnt/uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {

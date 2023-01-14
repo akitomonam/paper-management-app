@@ -75,7 +75,7 @@
         <br>
         <button class="preview-button" @click="showFile(paper.ID)">Preview</button>
         <button class="delete-button" @click="deleteFile(paper.ID)">Delete</button>
-        <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button>
+        <button class="get-bibtex-button" @click="getBibTeX">GetBibTeX</button>
         <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
     </div>
 </template>
@@ -251,9 +251,9 @@ export default {
             this.isLoading = false;
         },
         // bibTeX情報取得
-        async getBibTeX(targetFileId) {
+        async getBibTeX() {
             this.isLoading = true;
-            await axios.get(`${config.URL}:${config.PORT}/api/getBibTeX?fileId=${targetFileId}`)
+            await axios.get(`${config.URL}:${config.PORT}/api/getBibTeX?title=${this.paper.title}`)
                 .then((response) => {
                     console.log("edit auto response", response);
                     console.log("bibTeX情報取得が完了しました");
