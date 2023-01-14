@@ -25,9 +25,8 @@
         <!-- 編集前の表示 -->
         <div v-else>
             <div style="display:flex;justify-content:center;">
-                <star-rating @update:rating="setRating" v-bind:rating="rating"
-                    :max-rating="1" :show-rating="false" :clearable="true"
-                    :animate="true" :rounded-corners="true">
+                <star-rating @update:rating="setRating" v-bind:rating="rating" :max-rating="1" :show-rating="false"
+                    :clearable="true" :animate="true" :rounded-corners="true">
                 </star-rating>
                 <h1 style="margin-left: 10px;">Title:{{ paper.title }}</h1>
             </div>
@@ -52,6 +51,7 @@
         </div>
         <!-- <button class="edit-button" @click="editPaper">Edit</button> -->
         <button class="edit-button" @click="editMode = !editMode">Edit</button>
+        <button v-if="editMode" class="edit-auto-button" @click="editAutoPaper">Auto</button>
         <button v-if="editMode" class="edit-complete-button" @click="editPaper">Complete</button>
         <h2>File information</h2>
         <table>
@@ -75,16 +75,19 @@
         <br>
         <button class="preview-button" @click="showFile(paper.ID)">Preview</button>
         <button class="delete-button" @click="deleteFile(paper.ID)">Delete</button>
+        <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
     </div>
 </template>
 
 <script>
 import StarRating from 'vue-star-rating'
+import VueElementLoading from "vue-element-loading";
 import axios from 'axios'
 import { config } from "../../config";
 export default {
     components: {
-        StarRating
+        StarRating,
+        VueElementLoading
     },
     props: ['id'],
     data() {
@@ -102,7 +105,8 @@ export default {
                 year: ''
             },
             editMode: false,
-            rating: 0
+            rating: 0,
+            isLoading: false,
         }
     },
     created() {
@@ -211,6 +215,39 @@ export default {
                     alert("編集APIでエラーが発生しました")
                 });
         },
+        // 自動メタ情報付与
+        async editAutoPaper() {
+            this.isLoading = true;
+            await axios
+                .post(
+                    `${config.URL}:${config.PORTPYTHON}/api/python/get_paper_meta_data`,
+                    {
+                        file_path: this.paper.file_path
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                )
+                .then((response) => {
+                    console.log("edit auto response", response);
+                    console.log("自動補完が完了しました");
+                    // 画面上の文字列を更新する
+                    this.paper.title = response.data.title;
+                    // this.paper.abstract = response.data.abstract;
+                    this.paper.author = response.data.author;
+                    // this.paper.publisher = response.data.publisher;
+                    // this.paper.year = response.data.year;
+                    // this.editMode = false;
+                })
+                .catch((error) => {
+                    console.log("自動編集APIでエラーが発生しました");
+                    console.error(error);
+                    alert("自動編集APIでエラーが発生しました")
+                });
+            this.isLoading = false;
+        },
         async setRating(rating) {
             this.rating = rating;
             await axios
@@ -246,6 +283,7 @@ table {
     border-collapse: collapse;
     margin: 0 auto;
 }
+
 .preview-button {
     color: white;
     background-color: rgb(88, 88, 226);

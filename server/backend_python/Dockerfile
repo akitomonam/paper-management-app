@@ -13,3 +13,4 @@ ENV TERM xterm
 RUN apt-get install -y vim less
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools
+RUN pip install flask flask_cors beautifulsoup4 lxml
