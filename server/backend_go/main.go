@@ -95,10 +95,10 @@ func getConfig() Config {
 }
 
 // IndexHandler インデックスページを表示するハンドラ
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/html")
-	http.ServeFile(w, r, "index.html")
-}
+// func indexHandler(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Add("Content-Type", "text/html")
+// 	http.ServeFile(w, r, "index.html")
+// }
 
 // UploadHandler アップロードを行うハンドラ
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -258,6 +258,8 @@ func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 
 	// ファイルのURLを取得する
 	fileUrl, err := getFileUrl(fileId)
+	//適したURLの形にする
+	// fileUrl = fileUrl[1:]
 	fmt.Println("fileUrl:", fileUrl)
 	if err != nil {
 		// エラーを出力する
@@ -670,7 +672,6 @@ func apicheckFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
-	// mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/upload/file", uploadHandler)
 	mux.HandleFunc("/api/delete", deleteFileHandler)
 	mux.HandleFunc("/api/tables", apiTablesHandler)
@@ -683,7 +684,7 @@ func setupRoutes(config Config) {
 	mux.HandleFunc("/api/editpaperinfo", apiEditPaperInfoHandler)
 	mux.HandleFunc("/api/favorite", apiFavoriteHandler)
 	mux.HandleFunc("/api/checkFavorite", apicheckFavoriteHandler)
-	mux.Handle("/uploadfiles/", http.StripPrefix("/uploadfiles/", http.FileServer(http.Dir("./uploadfiles"))))
+	mux.Handle("/mnt/uploadfiles/", http.StripPrefix("/mnt/uploadfiles", http.FileServer(http.Dir("/mnt/uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
 		log.Fatal(err)

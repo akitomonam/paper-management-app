@@ -84,7 +84,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// 保存用のディレクトリを作成する（存在していなければ、保存用のディレクトリを新規作成）
-	err = os.MkdirAll("./uploadfiles", os.ModePerm)
+	err = os.MkdirAll("/mnt/uploadfiles", os.ModePerm)
 	if err != nil {
 		status = "False"
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -120,7 +120,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(filename)
 
 	// 保存先のパスを生成する
-	savePath := "./uploadfiles/" + filename
+	savePath := "/mnt/uploadfiles/" + filename
 
 	// os.Statで、保存先のパスが存在するか確認する
 	_, err = os.Stat(savePath)
@@ -129,7 +129,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		// 番号をつける
 		i := 1
 		for {
-			savePath = "./uploadfiles/" + filename[:len(filename)-len(ext)] + "(" + fmt.Sprint(i) + ")" + ext
+			savePath = "/mnt/uploadfiles/" + filename[:len(filename)-len(ext)] + "(" + fmt.Sprint(i) + ")" + ext
 			_, err = os.Stat(savePath)
 			if err != nil {
 				break
@@ -175,7 +175,7 @@ func sqlConnect() (database *gorm.DB, err error) {
 	DBMS := "mysql"
 	USER := "root"
 	PASS := "sdkogaken"
-	PROTOCOL := "tcp(vgs-db)"
+	PROTOCOL := "tcp(db-mysql)"
 	DBNAME := "test_database"
 
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"

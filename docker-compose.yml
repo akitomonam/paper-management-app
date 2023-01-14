@@ -2,69 +2,68 @@ version: '3'
 services:
 
   # Go Server
-  server:
+  server-go:
     build:
       context: ./server/backend_go
       dockerfile: Dockerfile
-    container_name: vgs-server
+    container_name: server-go
     ports:
       - 12345:12345
+    working_dir: /workspace
     tty: true # コンテナの起動永続化
     volumes:
-      - ./server/backend_go:/go/src/github.com/akitomonam/paper-management-app/server
-      - .git:/go/src/github.com/akitomonam/paper-management-app/.git
+      - ./server/backend_go:/workspace
+      - ./server/uploadfiles:/mnt/uploadfiles
     depends_on:
-      - 'db'
+      - 'db-mysql'
   # grobid server
-  grobidserver:
+  server-grobid:
     build:
       context: ./server/backend_grobid
       dockerfile: Dockerfile
-    container_name: vgs-backend-grobid
+    container_name: backend-grobid
     ports:
       - 8070:8070
-    working_dir: '/opt/grobid'
+    working_dir: /opt/grobid
     tty: true # コンテナの起動永続化
     volumes:
-      - ./server/backend_grobid:/root
-      - .git:/root/.git
+      - ./server/backend_grobid:/workspace
     runtime: nvidia
   # backend python
-  backendpython:
+  backend-python:
     build:
       context: ./server/backend_python
       dockerfile: Dockerfile
-    container_name: vgs-backend-python
+    container_name: backend-python
     ports:
       - 12340:12340
-    working_dir: '/root/'
+    working_dir: /workspace
     tty: true # コンテナの起動永続化
     volumes:
-      - ./server/backend_python:/root
-      - .git:/root/.git
+      - ./server/backend_python:/workspace
+      - ./server/uploadfiles:/mnt/uploadfiles
     # command: sh -c "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install"
     # とりあえずコンテナが停止しないように「tail -f /dev/null」
-    entrypoint: ["sh", "-c", "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install && tail -f /dev/null"]
+    entrypoint: ["sh", "-c", "cd /workspace && rm -rf /workspace/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /workspace/grobid_client_python && python setup.py install && tail -f /dev/null"]
     # stdin_open: true
   # client
-  client:
+  client-vue:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: vgs-client
+    container_name: client-vue
     ports:
       - 8080:8080
     tty: true # コンテナの起動永続化
     volumes:
-      - ./client:/usr/src/app/client
-      - .git:/usr/src/app/.git
-    command: sh -c "cd /usr/src/app/client/Vue3 && npm install && npm run build && npm run serve"
+      - ./client:/workspace
+    command: sh -c "cd /workspace/Vue3 && npm install && npm run build && npm run serve"
   # DB
-  db:
+  db-mysql:
     build:
       context: ./db
       dockerfile: Dockerfile
-    container_name: vgs-db
+    container_name: db-mysql
     ports:
       - 3306:3306
     environment:
