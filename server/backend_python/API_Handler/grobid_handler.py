@@ -6,7 +6,7 @@ import os
 from bs4 import BeautifulSoup
 sys.path.append('../grobid_client_python')
 from grobid_client.grobid_client_one_file import GrobidClient as GCOne
-
+import socket
 
 app = Flask(__name__)
 CORS(app)
@@ -50,4 +50,4 @@ def extract_information_from_xml_file(file_path):
     return info_dict
 
 if __name__ == '__main__':
-    app.run(host='172.20.0.2', port=12340)
+    app.run(host=socket.gethostbyname(socket.gethostname()), port=12340)
