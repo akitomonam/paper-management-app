@@ -18,7 +18,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .bm-burger-button {
     position: fixed;
     width: 36px;

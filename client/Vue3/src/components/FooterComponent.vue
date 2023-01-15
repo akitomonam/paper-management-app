@@ -16,10 +16,11 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 footer {
     background-color: rgba(255, 255, 255, 0);
     padding: 10px;
     font-size: 10px;
+    text-align: center;
 }
 </style>
