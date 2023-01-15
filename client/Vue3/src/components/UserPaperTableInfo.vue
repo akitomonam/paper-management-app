@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div>
+    <div style="text-align: center;">
         <h2>My Uploaded File List</h2>
         <FileTable :tables="tables" @update-tables="updateTables" />
         <h2>My Favorite File List</h2>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <HeaderComponent />
-    <SideBar/>
+    <!-- <SideBar/> -->
     <router-view />
     <FooterComponent />
   </div>
@@ -9,7 +9,7 @@
 
 <script>
 import HeaderComponent from "./components/HeaderComponent.vue";
-import SideBar from "./components/SideBar.vue";
+// import SideBar from "./components/SideBar.vue";
 import FooterComponent from "./components/FooterComponent.vue";
 
 
@@ -17,7 +17,7 @@ export default {
   name: "PaperManagement",
   components: {
     HeaderComponent,
-    SideBar,
+    // SideBar,
     FooterComponent,
   },
   data() {

@@ -1,8 +1,8 @@
 <template>
     <div>
-        <h1>Home</h1>
+        <!-- <h1>Home</h1> -->
         <UploadForm @update-upload-status="updateUploadStatus" />
-        <h2>Uploaded File List</h2>
+        <h2 style="text-align:center;">Uploaded File List</h2>
         <FileTable :tables="tables" @update-tables="updateTables" />
     </div>
 </template>
@@ -45,11 +45,5 @@ export default {
 };
 </script>
 
-<style>
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-}
+<style scoped>
 </style>

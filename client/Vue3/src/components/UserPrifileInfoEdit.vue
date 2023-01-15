@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="text-align: center;">
         <div>
             <h2>Edit Settings</h2>
             <form>

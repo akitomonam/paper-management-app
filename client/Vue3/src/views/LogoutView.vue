@@ -1,11 +1,13 @@
 <template>
-    <el-card class="box-card login">
-        <div class="clearfix" style="text-align: center;">
-            <span>Logout</span>
-        </div>
+    <el-card class="box-card logout">
+        <template #header>
+            <div class="card-header">
+                <span>Logout</span>
+            </div>
+        </template>
         <el-form :model="form" label-width="120px" style="max-width: 460px; text-align: center;">
             <el-form-item>
-                <div style="margin: 0 auto;">
+                <div style="margin: auto;">
                     <el-button type="primary" @click="logout">Logout</el-button>
                 </div>
             </el-form-item>
@@ -31,7 +33,7 @@ export default {
     width: 480px;
 }
 
-.login {
+.logout {
     position: relative;
     top: 100px;
     right: 0px;

@@ -1,14 +1,31 @@
 <template>
-    <div class="Registration">
-        <div class="Registration-triangle"></div>
-        <h2 class="Registration-header">Registration</h2>
-        <form class="Registration-container">
-            <p><input type="username" placeholder="Username" v-model="username"></p>
-            <p><input type="password" placeholder="Password" v-model="password"></p>
-            <p><input type="submit" value="Registration" @click.prevent="signup"></p>
-        </form>
-        <p><router-link to="/login">login</router-link></p>
-    </div>
+    <el-card class="box-card register">
+        <template #header>
+            <div class="card-header">
+                <span>Registration</span>
+                <el-button type="text" @click="login">
+                    <el-icon el-icon--left>
+                        <UserFilled />
+                    </el-icon>
+                    Login
+                </el-button>
+            </div>
+        </template>
+        <el-form :model="form" label-width="120px" style="max-width: 460px">
+            <el-form-item label="User name">
+                <el-input v-model="username" />
+            </el-form-item>
+            <el-form-item label="Password">
+                <el-input type="password" autocomplete="off" v-model="password" />
+            </el-form-item>
+            <el-form-item>
+                <div style="margin: 0 auto;">
+                    <el-button type="primary" @click="signup">Register</el-button>
+
+                </div>
+            </el-form-item>
+        </el-form>
+    </el-card>
 </template>
 <script>
 import axios from 'axios';
@@ -45,96 +62,28 @@ export default {
                 console.error(error);
             }
         },
+        login() {
+            this.$router.push({ path: '/login' });
+        }
     },
 };
 </script>
 
 <style scoped>
-body {
-    background: rgba(255, 255, 255, 0);
-    font-family: 'Open Sans', sans-serif;
+.box-card {
+    width: 480px;
 }
-
-.Registration {
-    width: 400px;
-    margin: 16px auto;
-    font-size: 16px;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-
-/* Reset top and bottom margins from certain elements */
-.Registration-header,
-.Registration p {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-/* The triangle form is achieved by a CSS hack */
-.Registration-triangle {
-    width: 0;
-    margin-right: auto;
-    margin-left: auto;
-    border: 12px solid transparent;
-    border-bottom-color: #28d;
-}
-
-.Registration-header {
-    background: #28d;
-    padding: 20px;
-    font-size: 1.4em;
-    font-weight: normal;
-    text-align: center;
-    text-transform: uppercase;
-    color: #fff;
-}
-
-.Registration-container {
-    background: #ebebeb;
-    /* padding: 20px; */
-}
-
-/* Every row inside .Registration-container is defined with p tags */
-.Registration p {
-    padding: 12px;
-}
-
-.Registration input {
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    border-width: 1px;
-    border-style: solid;
-    padding: 16px;
-    outline: 0;
-    font-family: inherit;
-    font-size: 0.95em;
-}
-
-.Registration input[type="email"],
-.Registration input[type="password"] {
-    background: #fff;
-    border-color: #bbb;
-    color: #555;
-}
-
-/* Text fields' focus effect */
-.Registration input[type="email"]:focus,
-.Registration input[type="password"]:focus {
-    border-color: #888;
-}
-
-.Registration input[type="submit"] {
-    background: #28d;
-    border-color: transparent;
-    color: #fff;
-    cursor: pointer;
-}
-
-.Registration input[type="submit"]:hover {
-    background: #17c;
-}
-
-/* Buttons' focus effect */
-.Registration input[type="submit"]:focus {
-    border-color: #05a;
+.register {
+    position: relative;
+    top: 100px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    margin: auto;
 }
 </style>

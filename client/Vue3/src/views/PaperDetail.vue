@@ -1,77 +1,94 @@
 <template>
-    <div>
+    <div style="text-align:center">
         <!-- 編集用のエリア -->
-        <div v-if="editMode">
-            <h1>Title: <input v-model="paper.title" type="text"></h1>
-            <table>
-                <tr>
-                    <th>Abstract:</th>
-                    <td><input v-model="paper.abstract" type="text"></td>
-                </tr>
-                <tr>
-                    <th>Author:</th>
-                    <td><input v-model="paper.author" type="text"></td>
-                </tr>
-                <tr>
-                    <th>Publisher:</th>
-                    <td><input v-model="paper.publisher" type="text"></td>
-                </tr>
-                <tr>
-                    <th>Year:</th>
-                    <td><input v-model="paper.year" type="number"></td>
-                </tr>
-            </table>
-        </div>
-        <!-- 編集前の表示 -->
-        <div v-else>
-            <div style="display:flex;justify-content:center;">
-                <star-rating @update:rating="setRating" v-bind:rating="rating" :max-rating="1" :show-rating="false"
-                    :clearable="true" :animate="true" :rounded-corners="true">
-                </star-rating>
-                <h1 style="margin-left: 10px;">Title:{{ paper.title }}</h1>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>Paper infomation</span>
+                    <el-button v-if="editMode" class="button" text @click="editAutoPaper"><el-icon>
+                            <MagicStick />
+                        </el-icon>Auto</el-button>
+                    <el-button v-if="editMode" class="button" text @click="editPaper"><el-icon el-icon--left>
+                            <Finished />
+                        </el-icon>Comlete</el-button>
+                    <el-button class="button" text @click="editMode = !editMode"><el-icon el-icon--left>
+                            <Edit />
+                        </el-icon>Edit</el-button>
+                </div>
+            </template>
+            <div v-if="editMode">
+                <el-form :label-position="labelPosition" label-width="100px" :model="formLabelAlign"
+                    style="max-width: 460px  text-align: center;">
+                    <el-form-item label="Title">
+                        <el-input v-model="paper.title" />
+                    </el-form-item>
+                    <el-form-item label="Abstract">
+                        <el-input v-model="paper.abstract" />
+                    </el-form-item>
+                    <el-form-item label="Author">
+                        <el-input v-model="paper.author" />
+                    </el-form-item>
+                    <el-form-item label="Publisher">
+                        <el-input v-model="paper.publisher" />
+                    </el-form-item>
+                    <el-form-item label="Year">
+                        <el-input-number v-model="paper.year" class="mx-4" :min="1" controls-position="right" />
+                    </el-form-item>
+                </el-form>
             </div>
+            <!-- 編集前の表示 -->
+            <div v-else>
+                <div style="display:flex;justify-content:center;">
+                    <star-rating @update:rating="setRating" v-bind:rating="rating" :max-rating="1" :show-rating="false"
+                        :clearable="true" :animate="true" :rounded-corners="true">
+                    </star-rating>
+                    <h1 style="margin-left: 10px;">Title:{{ paper.title }}</h1>
+                </div>
+                <table>
+                    <tr>
+                        <th>Abstract:</th>
+                        <td>{{ paper.abstract }}</td>
+                    </tr>
+                    <tr>
+                        <th>Author:</th>
+                        <td>{{ paper.author }}</td>
+                    </tr>
+                    <tr>
+                        <th>Publisher:</th>
+                        <td>{{ paper.publisher }}</td>
+                    </tr>
+                    <tr>
+                        <th>Year:</th>
+                        <td>{{ paper.year }}</td>
+                    </tr>
+                </table>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>File infomation</span>
+                </div>
+            </template>
             <table>
                 <tr>
-                    <th>Abstract:</th>
-                    <td>{{ paper.abstract }}</td>
+                    <th>ID:</th>
+                    <td>{{ paper.ID }}</td>
                 </tr>
                 <tr>
-                    <th>Author:</th>
-                    <td>{{ paper.author }}</td>
+                    <th>File name:</th>
+                    <td>{{ paper.file_name }}</td>
                 </tr>
                 <tr>
-                    <th>Publisher:</th>
-                    <td>{{ paper.publisher }}</td>
+                    <th>Uploader's ID:</th>
+                    <td>{{ paper.user_id }}</td>
                 </tr>
                 <tr>
-                    <th>Year:</th>
-                    <td>{{ paper.year }}</td>
+                    <th>Created at:</th>
+                    <td>{{ paper.created_at }}</td>
                 </tr>
             </table>
-        </div>
-        <!-- <button class="edit-button" @click="editPaper">Edit</button> -->
-        <button class="edit-button" @click="editMode = !editMode">Edit</button>
-        <button v-if="editMode" class="edit-auto-button" @click="editAutoPaper">Auto</button>
-        <button v-if="editMode" class="edit-complete-button" @click="editPaper">Complete</button>
-        <h2>File information</h2>
-        <table>
-            <tr>
-                <th>ID:</th>
-                <td>{{ paper.ID }}</td>
-            </tr>
-            <tr>
-                <th>File name:</th>
-                <td>{{ paper.file_name }}</td>
-            </tr>
-            <tr>
-                <th>Uploader's ID:</th>
-                <td>{{ paper.user_id }}</td>
-            </tr>
-            <tr>
-                <th>Created at:</th>
-                <td>{{ paper.created_at }}</td>
-            </tr>
-        </table>
+        </el-card>
         <br>
         <button class="preview-button" @click="showFile(paper.ID)">Preview</button>
         <button class="delete-button" @click="deleteFile(paper.ID)">Delete</button>
@@ -300,6 +317,26 @@ export default {
 </script>
 
 <style scoped>
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text {
+    font-size: 14px;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+.box-card {
+    width: auto;
+    margin: 10px;
+    position: relative;
+}
+
 table {
     border-collapse: collapse;
     margin: 0 auto;

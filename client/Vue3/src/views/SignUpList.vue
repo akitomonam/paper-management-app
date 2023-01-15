@@ -1,10 +1,11 @@
 <template>
-    <!-- tablesリスト中の辞書に含まれるnameを一覧表示する -->
     <div>
-        <h1>Registered Users List</h1>
-        <li v-for="table in tables" :key="table">
-            {{ table.Username }}
-        </li>
+        <h1 style="text-align: center;">Registered Users List</h1>
+        <div class="demo-type">
+            <div v-for="table in tables" :key="table">
+                <el-avatar > {{ table.Username }} </el-avatar>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -33,4 +34,16 @@ export default {
 </script>
 
 <style scoped>
+.demo-type {
+    display: flex;
+}
+
+.demo-type>div {
+    flex: 1;
+    text-align: center;
+}
+
+.demo-type>div:not(:last-child) {
+    border-right: 1px solid var(--el-border-color);
+}
 </style>

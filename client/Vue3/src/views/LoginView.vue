@@ -1,14 +1,16 @@
 <template>
     <el-card class="box-card login">
-        <div class="clearfix">
-            <span>Login</span>
-            <el-button style="float: right; padding: 3px 0" type="text" @click="register">
-                <el-icon el-icon--left>
-                    <UserFilled />
-                </el-icon>
-                Register
-            </el-button>
-        </div>
+            <template #header>
+                <div class="card-header">
+                    <span>Login</span>
+                    <el-button type="text" @click="register">
+                        <el-icon el-icon--left>
+                            <UserFilled />
+                        </el-icon>
+                        Register
+                    </el-button>
+                </div>
+            </template>
         <el-form :model="form" label-width="120px" style="max-width: 460px">
             <el-form-item label="User name">
                 <el-input v-model="username" />
@@ -21,9 +23,7 @@
                     <el-button type="primary" @click="login">Login</el-button>
 
                 </div>
-                <!-- <el-button @click="resetForm(ruleFormRef)">Reset</el-button> -->
             </el-form-item>
-            <!-- <router-link to="/signup">Register</router-link> -->
         </el-form>
     </el-card>
 </template>
@@ -79,6 +79,12 @@ export default {
 <style scoped>
 .box-card {
     width: 480px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .login {
