@@ -11,6 +11,9 @@
                     <el-button v-if="editMode" class="button" text @click="editPaper"><el-icon el-icon--left>
                             <Finished />
                         </el-icon>Comlete</el-button>
+                    <el-button v-if="!editMode" class="button" text @click="showFile(paper.ID)"><el-icon el-icon--left>
+                            <View />
+                        </el-icon>Preview</el-button>
                     <el-button class="button" text @click="editMode = !editMode"><el-icon el-icon--left>
                             <Edit />
                         </el-icon>Edit</el-button>
@@ -38,31 +41,20 @@
             </div>
             <!-- 編集前の表示 -->
             <div v-else>
-                <div style="display:flex;justify-content:center;">
-                    <star-rating @update:rating="setRating" v-bind:rating="rating" :max-rating="1" :show-rating="false"
-                        :clearable="true" :animate="true" :rounded-corners="true">
-                    </star-rating>
-                    <h1 style="margin-left: 10px;">Title:{{ paper.title }}</h1>
+                <div class="rate-block">
+                    <el-rate @change="setRating" v-model="rating" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" />
                 </div>
-                <table>
-                    <tr>
-                        <th>Abstract:</th>
-                        <td>{{ paper.abstract }}</td>
-                    </tr>
-                    <tr>
-                        <th>Author:</th>
-                        <td>{{ paper.author }}</td>
-                    </tr>
-                    <tr>
-                        <th>Publisher:</th>
-                        <td>{{ paper.publisher }}</td>
-                    </tr>
-                    <tr>
-                        <th>Year:</th>
-                        <td>{{ paper.year }}</td>
-                    </tr>
-                </table>
+                <el-descriptions :title="paper.title" column="1" size="default" direction="horizontal" border >
+                    <el-descriptions-item v-if="paper.title==``" label="Title">{{paper.title}}</el-descriptions-item>
+                    <el-descriptions-item label="Abstract">{{paper.abstract}}</el-descriptions-item>
+                    <el-descriptions-item label="Author">{{paper.author}}</el-descriptions-item>
+                    <el-descriptions-item label="Publisher">{{paper.publisher}}</el-descriptions-item>
+                    <el-descriptions-item label="Year">{{paper.year}}</el-descriptions-item>
+                </el-descriptions>
             </div>
+            <el-button v-if="editMode" size="small" type="danger" bg text @click="deleteFile(paper.ID)"><el-icon el-icon--left>
+                    <Delete />
+                </el-icon>Delete</el-button>
         </el-card>
         <el-card class="box-card">
             <template #header>
@@ -70,28 +62,14 @@
                     <span>File infomation</span>
                 </div>
             </template>
-            <table>
-                <tr>
-                    <th>ID:</th>
-                    <td>{{ paper.ID }}</td>
-                </tr>
-                <tr>
-                    <th>File name:</th>
-                    <td>{{ paper.file_name }}</td>
-                </tr>
-                <tr>
-                    <th>Uploader's ID:</th>
-                    <td>{{ paper.user_id }}</td>
-                </tr>
-                <tr>
-                    <th>Created at:</th>
-                    <td>{{ paper.created_at }}</td>
-                </tr>
-            </table>
+            <el-descriptions column="1" size="default" direction="horizontal" border>
+                <el-descriptions-item label="ID">{{paper.ID}}</el-descriptions-item>
+                <el-descriptions-item label="File name">{{paper.file_name}}</el-descriptions-item>
+                <el-descriptions-item label="Uploader's ID">{{paper.user_id}}</el-descriptions-item>
+                <el-descriptions-item label="Created at">{{paper.created_at}}</el-descriptions-item>
+            </el-descriptions>
         </el-card>
         <br>
-        <button class="preview-button" @click="showFile(paper.ID)">Preview</button>
-        <button class="delete-button" @click="deleteFile(paper.ID)">Delete</button>
         <!-- <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button> -->
         <CommentComponent />
         <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
@@ -99,7 +77,6 @@
 </template>
 
 <script>
-import StarRating from 'vue-star-rating'
 import VueElementLoading from "vue-element-loading";
 import axios from 'axios'
 import CommentComponent from '../components/CommentComponent.vue'
@@ -107,7 +84,6 @@ import { config } from "../../config";
 export default {
     components: {
         CommentComponent,
-        StarRating,
         VueElementLoading
     },
     props: ['id'],
@@ -286,8 +262,7 @@ export default {
         //         });
         //     this.isLoading = false;
         // },
-        async setRating(rating) {
-            this.rating = rating;
+        async setRating() {
             await axios
                 .post(
                     `${config.URL}:${config.PORT}/api/favorite`,
@@ -322,42 +297,9 @@ export default {
     justify-content: space-between;
     align-items: center;
 }
-
-.text {
-    font-size: 14px;
-}
-
-.item {
-    margin-bottom: 18px;
-}
-
 .box-card {
     width: auto;
     margin: 10px;
     position: relative;
-}
-
-table {
-    border-collapse: collapse;
-    margin: 0 auto;
-}
-
-.preview-button {
-    color: white;
-    background-color: rgb(88, 88, 226);
-    height: 50px;
-    width: 100px;
-    border: none;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-.delete-button {
-    color: white;
-    background-color: rgb(239, 58, 58);
-    height: 50px;
-    width: 100px;
-    border: none;
-    cursor: pointer;
 }
 </style>

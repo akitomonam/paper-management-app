@@ -1,6 +1,8 @@
 <template>
     <div>
-        <h1 style="text-align: center;">Registered Users List</h1>
+        <el-header>
+            <div style="text-align: center; font-size:x-large; margin: 10px;">Registered Users List</div>
+        </el-header>
         <div class="demo-type">
             <div v-for="table in tables" :key="table">
                 <el-avatar > {{ table.Username }} </el-avatar>

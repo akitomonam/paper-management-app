@@ -2,7 +2,12 @@
     <div>
         <form @submit.prevent="uploadFile">
             <input type="file" ref="fileInput" @change="updateButtonDisabledStatus"/>
-            <button type="submit" :disabled="isButtonDisabled">Upload</button>
+            <el-button :disabled="isButtonDisabled" type="primary" @click="uploadFile">
+                <el-icon class="el-icon--left">
+                    <Upload />
+                </el-icon>
+                Upload
+            </el-button>
         </form>
         <vue-element-loading :active="isUploading" is-full-screen text="Now uploading..." size="128"/>
     </div>

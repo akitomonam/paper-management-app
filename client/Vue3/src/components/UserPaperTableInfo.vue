@@ -1,10 +1,24 @@
 <template>
 <div>
-    <div style="text-align: center;">
-        <h2>My Uploaded File List</h2>
-        <FileTable :tables="tables" @update-tables="updateTables" />
-        <h2>My Favorite File List</h2>
-        <FileTable :tables="favorite_tables" @update-tables="updateTables(true)" />
+    <div style="text-align: center; margin-top: 20px;">
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>My Uploaded File List</span>
+                    <!-- <el-button class="button" text>Operation button</el-button> -->
+                </div>
+            </template>
+            <FileTable :tables="tables" @update-tables="updateTables" />
+        </el-card>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>My Favorite File List</span>
+                    <!-- <el-button class="button" text>Operation button</el-button> -->
+                </div>
+            </template>
+            <FileTable :tables="favorite_tables" @update-tables="updateTables(true)" />
+        </el-card>
     </div>
 </div>
 </template>
@@ -47,4 +61,22 @@ export default {
 </script>
 
 <style scoped>
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text {
+    font-size: 14px;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+.box-card {
+    width: auto;
+    margin: 30px;
+}
 </style>

@@ -1,9 +1,16 @@
 <template>
     <div>
         <!-- <h1>Home</h1> -->
-        <UploadForm @update-upload-status="updateUploadStatus" />
-        <h2 style="text-align:center;">Uploaded File List</h2>
-        <FileTable :tables="tables" @update-tables="updateTables" />
+        <UploadForm @update-upload-status="updateUploadStatus" style="margin-top:20px"/>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>Uploaded File List</span>
+                    <!-- <el-button class="button" text>Operation button</el-button> -->
+                </div>
+            </template>
+            <FileTable :tables="tables" @update-tables="updateTables" />
+        </el-card>
     </div>
 </template>
 
@@ -46,4 +53,22 @@ export default {
 </script>
 
 <style scoped>
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text {
+    font-size: 14px;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+.box-card {
+    width: auto;
+    margin: 30px;
+}
 </style>

@@ -178,7 +178,7 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 		if favorite_flag == "true" {
 			// user_idを使用して、favoritesテーブルのratingが1であるpapers_idを用いてPapersからレコードを取得する
 			var favoriteIDs []int
-			if err := db.Table("favorites").Where("user_id = ? AND rating = 1", user_id).Pluck("paper_id", &favoriteIDs).Error; err != nil {
+			if err := db.Table("favorites").Where("user_id = ? AND rating >= 1", user_id).Pluck("paper_id", &favoriteIDs).Error; err != nil {
 				fmt.Println("エラー:", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

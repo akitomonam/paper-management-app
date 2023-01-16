@@ -15,7 +15,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-const MaxUploadSize = 1024 * 1024 // 最大ファイルサイズ
+const MaxUploadSize = 100 * 1024 * 1024 // 最大ファイルサイズ
 
 type Papers struct {
 	ID         int

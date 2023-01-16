@@ -1,7 +1,7 @@
 <template>
     <el-footer>
         <p>Created:Akitomo SATO</p>
-        <p>University of Electro-communications</p>
+        <!-- <p>University of Electro-communications</p> -->
     </el-footer>
 </template>
 <script>
@@ -19,20 +19,12 @@ export default {
 <style scoped>
 footer {
     width: 100%;
-    /* background-color: #6b6b6b; */
-    padding: 10px 10px;
+    background-color: #ffffff;
+    padding: 0px;
     font-size: 10px;
     text-align: center;
     position: absolute;
     bottom: 0;
+    border-top: 1px solid #000000;
 }
-/* footer {
-    width: 100%;
-    background-color: #89c7de;
-    color: #fff;
-    text-align: center;
-    padding: 30px 0;
-    position: absolute;
-    bottom: 0;
-} */
 </style>

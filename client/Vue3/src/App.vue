@@ -3,14 +3,14 @@
     <HeaderComponent />
     <!-- <SideBar/> -->
     <router-view />
-    <FooterComponent />
+    <!-- <FooterComponent /> -->
   </div>
 </template>
 
 <script>
 import HeaderComponent from "./components/HeaderComponent.vue";
 // import SideBar from "./components/SideBar.vue";
-import FooterComponent from "./components/FooterComponent.vue";
+// import FooterComponent from "./components/FooterComponent.vue";
 
 
 export default {
@@ -18,7 +18,7 @@ export default {
   components: {
     HeaderComponent,
     // SideBar,
-    FooterComponent,
+    // FooterComponent,
   },
   data() {
     return {
