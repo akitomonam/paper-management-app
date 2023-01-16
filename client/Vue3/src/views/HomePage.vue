@@ -5,7 +5,7 @@
         <el-card class="box-card">
             <template #header>
                 <div class="card-header">
-                    <span>Uploaded File List</span>
+                    <span>Paper List</span>
                     <!-- <el-button class="button" text>Operation button</el-button> -->
                 </div>
             </template>

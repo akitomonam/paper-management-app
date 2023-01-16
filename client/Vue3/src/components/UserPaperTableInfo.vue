@@ -4,7 +4,7 @@
         <el-card class="box-card">
             <template #header>
                 <div class="card-header">
-                    <span>My Uploaded File List</span>
+                    <span>My Uploaded Paper List</span>
                     <!-- <el-button class="button" text>Operation button</el-button> -->
                 </div>
             </template>
@@ -13,7 +13,7 @@
         <el-card class="box-card">
             <template #header>
                 <div class="card-header">
-                    <span>My Favorite File List</span>
+                    <span>My Favorite Paper List</span>
                     <!-- <el-button class="button" text>Operation button</el-button> -->
                 </div>
             </template>
