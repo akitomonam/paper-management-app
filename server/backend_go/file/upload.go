@@ -101,9 +101,10 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filetype := http.DetectContentType(buff)
-	if filetype != "image/jpeg" && filetype != "image/png" && filetype != "application/pdf" {
+	fmt.Println("filetype:", filetype)
+	if filetype != "image/jpeg" && filetype != "image/png" && filetype != "application/pdf" && filetype != "application/zip" {
 		status = "False"
-		http.Error(w, "JPEG、PNG、または、PDFでアップロードしてください。", http.StatusBadRequest)
+		http.Error(w, "JPEG、PNG、PDF、または、パワーポイントでアップロードしてください。", http.StatusBadRequest)
 		return
 	}
 
