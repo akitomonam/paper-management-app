@@ -1,13 +1,18 @@
 <template>
     <div>
-        <el-header>
-            <div style="text-align: center; font-size:x-large; margin: 10px;">Registered Users List</div>
-        </el-header>
-        <div class="demo-type">
-            <div v-for="table in tables" :key="table">
-                <el-avatar > {{ table.Username }} </el-avatar>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>Registered Users List</span>
+                    <!-- <el-button class="button" text>Operation button</el-button> -->
+                </div>
+            </template>
+            <div class="demo-type">
+                <div v-for="table in tables" :key="table">
+                    <el-avatar > {{ table.Username }} </el-avatar>
+                </div>
             </div>
-        </div>
+        </el-card>
     </div>
 </template>
 
@@ -47,5 +52,24 @@ export default {
 
 .demo-type>div:not(:last-child) {
     border-right: 1px solid var(--el-border-color);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text {
+    font-size: 14px;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+.box-card {
+    width: auto;
+    margin: 40px;
 }
 </style>

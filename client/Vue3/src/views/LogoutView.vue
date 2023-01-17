@@ -5,13 +5,9 @@
                 <span>Logout</span>
             </div>
         </template>
-        <el-form :model="form" label-width="120px" style="max-width: 460px; text-align: center;">
-            <el-form-item>
-                <div style="margin: auto;">
+                <div style="margin: auto; text-align: center;">
                     <el-button type="primary" @click="logout">Logout</el-button>
                 </div>
-            </el-form-item>
-        </el-form>
     </el-card>
 </template>
 <script>
