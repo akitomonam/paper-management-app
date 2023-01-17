@@ -1,4 +1,3 @@
-Copy code
 <template>
     <div>
         <el-card class="box-card">
@@ -16,13 +15,10 @@ Copy code
                     <el-button @click="postMessage" type="primary">Post</el-button>
                 </el-form-item>
             </el-form>
-        </el-card>
-        <el-card v-for="message in messages" :key="message.id" class="bulletin-card">
-            <p>{{ message.text }}</p>
-            <p>{{ message.date }}</p>
-            <el-card v-for="comment in message.comments" :key="comment.id" class="comment-card">
-                <p>{{ comment.text }}</p>
-                <p>{{ comment.date }}</p>
+            <el-card v-for="message in reverseItems" :key="message.CreatedAt" class="bulletin-card">
+                <p>{{ message.UserID }}</p>
+                <p>{{ message.Content }}</p>
+                <p>{{ message.CreatedAt }}</p>
             </el-card>
         </el-card>
     </div>
@@ -30,33 +26,73 @@ Copy code
 
 <script>
 import axios from 'axios'
+import { config } from "../../config";
 
 export default {
+    props: {
+        "paper_id":{
+            required: true
+    }},
     data() {
         return {
             messages: [],
             message: '',
         }
     },
-    created() {
-        this.fetchMessages()
+    computed: {
+        reverseItems() {
+            return this.messages.slice().reverse();
+        },
     },
     methods: {
-        async postMessage() {
-            // send the message to the backend
-            let response = await axios.post('/api/messages', { text: this.message })
-            if (response.data) {
-                this.message = ''
-                this.fetchMessages()
-            }
-        },
         async fetchMessages() {
-            // fetch messages and their comments from the backend
-            let response = await axios.get('/api/messages')
-            if (response.data) {
-                this.messages = response.data
-            }
+            axios.get(`${config.URL}:${config.PORT}/api/comment_preview`,
+                {
+                    params: {
+                        sessionToken: localStorage.getItem('sessionToken'),
+                        paperId: this.paper_id,
+                    }
+                })
+                .then(response => {
+                    console.log("messages", response.data)
+                    this.messages = response.data
+                    return this.messages
+                })
+                .catch((error) => {
+                    console.log("コメント一覧取得APIでエラーが発生しました");
+                    console.error(error);
+                    alert("コメント一覧取得APIでエラーが発生しました")
+                });
         },
+        async postMessage() {
+            console.log("paper_id",this.paper_id)
+            axios.post(`${config.URL}:${config.PORT}/api/comment_add`,
+                {
+                    sessionToken: localStorage.getItem('sessionToken'),
+                    paperId: this.paper_id,
+                    comments: this.message
+
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                })
+                .then(response => {
+                    console.log(response.data)
+                    this.fetchMessages()
+                })
+                .catch((error) => {
+                    console.log("コメント投稿APIでエラーが発生しました");
+                    console.error(error);
+                    alert("コメント投稿APIでエラーが発生しました")
+                });
+        },
+    },
+    watch: {
+        paper_id() {
+            this.fetchMessages()
+        }
     },
 }
 </script>
@@ -66,6 +102,12 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.bulletin-card {
+    /* width: auto; */
+    margin: 1px 15px;
+    /* position: relative; */
 }
 
 .box-card {

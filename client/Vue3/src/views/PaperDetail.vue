@@ -71,7 +71,7 @@
         </el-card>
         <br>
         <!-- <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button> -->
-        <CommentComponent />
+        <CommentComponent :paper_id="paper.ID"/>
         <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
     </div>
 </template>
