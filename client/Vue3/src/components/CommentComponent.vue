@@ -1,53 +1,76 @@
+Copy code
 <template>
     <div>
-        <form>
-            <textarea v-model="newComment"></textarea>
-            <button @click="submitComment">Submit</button>
-        </form>
-        <div class="comments">
-            <div class="comment" v-for="(comment, index) in comments" :key="index">
-                {{ comment }}
-            </div>
-        </div>
+        <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>Comment</span>
+                    <!-- <el-button class="button" text>Operation button</el-button> -->
+                </div>
+            </template>
+            <el-form>
+                <el-form-item>
+                    <el-input v-model="message" placeholder="Enter your message"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button @click="postMessage" type="primary">Post</el-button>
+                </el-form-item>
+            </el-form>
+        </el-card>
+        <el-card v-for="message in messages" :key="message.id" class="bulletin-card">
+            <p>{{ message.text }}</p>
+            <p>{{ message.date }}</p>
+            <el-card v-for="comment in message.comments" :key="comment.id" class="comment-card">
+                <p>{{ comment.text }}</p>
+                <p>{{ comment.date }}</p>
+            </el-card>
+        </el-card>
     </div>
 </template>
+
 <script>
+import axios from 'axios'
+
 export default {
     data() {
         return {
-            newComment: '',
-            comments: []
+            messages: [],
+            message: '',
         }
     },
+    created() {
+        this.fetchMessages()
+    },
     methods: {
-        submitComment() {
-            // add newComment to the list of comments
-            this.comments.push(this.newComment);
-            this.newComment = '';
-        }
-    }
+        async postMessage() {
+            // send the message to the backend
+            let response = await axios.post('/api/messages', { text: this.message })
+            if (response.data) {
+                this.message = ''
+                this.fetchMessages()
+            }
+        },
+        async fetchMessages() {
+            // fetch messages and their comments from the backend
+            let response = await axios.get('/api/messages')
+            if (response.data) {
+                this.messages = response.data
+            }
+        },
+    },
 }
 </script>
+
 <style>
-form {
+.card-header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 
-textarea {
-    width: 100%;
-    height: 100px;
-    margin-bottom: 10px;
-    padding: 5px;
-}
-
-.comments {
-    margin-top: 20px;
-}
-
-.comment {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
+.box-card {
+    width: auto;
+    margin: 10px;
+    position: relative;
 }
 </style>
