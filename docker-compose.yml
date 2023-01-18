@@ -44,7 +44,7 @@ services:
       - ./server/uploadfiles:/mnt/uploadfiles
     # command: sh -c "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install"
     # とりあえずコンテナが停止しないように「tail -f /dev/null」
-    entrypoint: ["sh", "-c", "cd /workspace && rm -rf /workspace/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /workspace/grobid_client_python && python setup.py install && tail -f /dev/null"]
+    entrypoint: ["sh", "-c", "cd /workspace && rm -rf /workspace/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /workspace/grobid_client_python && python setup.py install && cd /workspace/API_Handler && python grobid_handler.py"]
     # stdin_open: true
   # client
   client-vue:

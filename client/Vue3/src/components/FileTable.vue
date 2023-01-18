@@ -27,7 +27,7 @@
 <script>
 // import draggable from "vuedraggable";
 import axios from 'axios'
-import 'vue-good-table-next/dist/vue-good-table-next.css'
+// import 'vue-good-table-next/dist/vue-good-table-next.css'
 import { config } from "../../config";
 export default {
     name: "FileTable",
@@ -44,32 +44,6 @@ export default {
         return {
             search: '',
             localTables: this.tables,
-            columns: [
-                {
-                    label: 'ID',
-                    field: 'ID',
-                },
-                {
-                    label: 'Title',
-                    field: 'title',
-                },
-                {
-                    label: 'author',
-                    field: 'author',
-                },
-                {
-                    label: 'publisher',
-                    field: 'publisher',
-                },
-                {
-                    label: 'year',
-                    field: 'year',
-                },
-                {
-                    label: 'Filename',
-                    field: 'file_name',
-                },
-            ],
         };
     },
     created() {
