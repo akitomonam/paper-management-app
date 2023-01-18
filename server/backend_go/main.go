@@ -688,35 +688,67 @@ func apiCommentPreviewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// クエリパラメータからセッショントークンとペーパーIDを取得する
-	session_token := r.URL.Query().Get("sessionToken")
+	// クエリパラメータからペーパーIDを取得する
 	paperIdStr := r.URL.Query().Get("paperId")
 	paper_id, _ := strconv.Atoi(paperIdStr)
-	fmt.Println("session_token", session_token)
 	fmt.Println("paperIdStr", paperIdStr)
-
-	//session_tokenからuser_idを取得
-	var session Sessions
-	db.Where("session_token = ?", session_token).First(&session)
-	if session.User_id == 0 {
-		http.Error(w, "Session Token is not found", http.StatusUnauthorized)
-		return
-	}
-	user_id := session.User_id
 
 	var comments []Comment
 
-	// paper_id, user_idを使用して、commentsからレコードを取得する
-	if err := db.Where("paper_id = ? and user_id = ?", paper_id, user_id).Find(&comments).Error; err != nil {
+	// paper_idを用いてcommentsからレコードを取得する
+	if err := db.Where("paper_id = ?", paper_id).Find(&comments).Error; err != nil {
 		// エラーを出力する
 		fmt.Println("Error:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Papersの中身をJSON形式で返す
+	// commentsのuser_idを用いてusersのusernameを紐づける(マージする)
+	type CommentPreview struct {
+		ID        int       `gorm:"primary_key;auto_increment"`
+		PaperID   int       `gorm:"not null"`
+		UserID    int       `gorm:"not null"`
+		Content   string    `gorm:"type:text;not null"`
+		CreatedAt time.Time `gorm:"not null"`
+		Username  string
+	}
+
+	var commentPreviews []CommentPreview
+
+	var users []Users
+
+	userIDs := []int{}
+	for _, comment := range comments {
+		userIDs = append(userIDs, comment.UserID)
+	}
+
+	// TODO:マージしたほうが速い
+
+	if err := db.Select("id, username").Where("id IN (?)", userIDs).Find(&users).Error; err != nil {
+		fmt.Println("Error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userMap := make(map[int]string)
+	for _, user := range users {
+		userMap[user.ID] = user.Username
+	}
+
+	for _, comment := range comments {
+		commentPreviews = append(commentPreviews, CommentPreview{
+			ID:        comment.ID,
+			PaperID:   comment.PaperID,
+			UserID:    comment.UserID,
+			Content:   comment.Content,
+			CreatedAt: comment.CreatedAt,
+			Username:  userMap[comment.UserID],
+		})
+	}
+
+	// commentPreviewsの中身をJSON形式で返す
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(comments); err != nil {
+	if err := json.NewEncoder(w).Encode(commentPreviews); err != nil {
 		fmt.Println("エラー:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

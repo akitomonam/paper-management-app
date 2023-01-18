@@ -16,9 +16,11 @@
                 </el-form-item>
             </el-form>
             <el-card v-for="message in reverseItems" :key="message.CreatedAt" class="bulletin-card">
-                <p>{{ message.UserID }}</p>
-                <p>{{ message.Content }}</p>
-                <p>{{ message.CreatedAt }}</p>
+                <div style="display:flex;">
+                    <el-avatar> {{ message.Username }} </el-avatar>
+                    <div style="margin-left: 10px;">{{ message.Content }}</div>
+                </div>
+                <p style="font-size: 12px;">{{ message.CreatedAt }}</p>
             </el-card>
         </el-card>
     </div>
@@ -30,9 +32,10 @@ import { config } from "../../config";
 
 export default {
     props: {
-        "paper_id":{
+        "paper_id": {
             required: true
-    }},
+        }
+    },
     data() {
         return {
             messages: [],
@@ -49,7 +52,6 @@ export default {
             axios.get(`${config.URL}:${config.PORT}/api/comment_preview`,
                 {
                     params: {
-                        sessionToken: localStorage.getItem('sessionToken'),
                         paperId: this.paper_id,
                     }
                 })
@@ -65,7 +67,7 @@ export default {
                 });
         },
         async postMessage() {
-            console.log("paper_id",this.paper_id)
+            console.log("paper_id", this.paper_id)
             axios.post(`${config.URL}:${config.PORT}/api/comment_add`,
                 {
                     sessionToken: localStorage.getItem('sessionToken'),
