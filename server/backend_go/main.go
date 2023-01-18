@@ -47,7 +47,7 @@ type Papers struct {
 	File_name  string    `json:"file_name"`
 	File_path  string    `json:"file_path"`
 	User_id    int       `json:"user_id"`
-	Created_at time.Time `json:"created_at"`
+	Created_at time.Time `gorm:"not null"`
 }
 
 type Comment struct {

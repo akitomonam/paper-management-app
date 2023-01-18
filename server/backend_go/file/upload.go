@@ -19,15 +19,15 @@ const MaxUploadSize = 100 * 1024 * 1024 // 最大ファイルサイズ
 
 type Papers struct {
 	ID         int
-	Title      string `json:"title"`
-	Author     string `json:"author"`
-	Publisher  string `json:"publisher"`
-	Year       int    `json:"year"`
-	Abstract   string `json:"abstract"`
-	File_name  string `json:"file_name"`
-	File_path  string `json:"file_path"`
-	User_id    int    `json:"user_id"`
-	Created_at string `json:"created_at" sql:"not null;type:datetime"`
+	Title      string    `json:"title"`
+	Author     string    `json:"author"`
+	Publisher  string    `json:"publisher"`
+	Year       int       `json:"year"`
+	Abstract   string    `json:"abstract"`
+	File_name  string    `json:"file_name"`
+	File_path  string    `json:"file_path"`
+	User_id    int       `json:"user_id"`
+	Created_at time.Time `gorm:"not null"`
 	// Createdat time.Time `json:"created_at" sql:"not null;type:datetime"`
 }
 
@@ -193,22 +193,15 @@ func add2sql(file_name string, file_path string, user_id int) {
 	defer db.Close()
 
 	error := db.Create(&Papers{
-		File_name:  file_name,
-		File_path:  file_path,
-		User_id:    user_id,
-		Created_at: getDate(),
+		File_name: file_name,
+		File_path: file_path,
+		User_id:   user_id,
 	}).Error
 	if error != nil {
 		fmt.Println(error)
 	} else {
 		fmt.Println("データ追加成功")
 	}
-}
-
-func getDate() string {
-	const layout = "2006-01-02 15:04:05"
-	now := time.Now()
-	return now.Format(layout)
 }
 
 func FindSession(sessionToken string) (Sessions, error) {

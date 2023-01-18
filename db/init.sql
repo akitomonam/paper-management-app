@@ -1,19 +1,10 @@
--- CREATE DATABASE IF NOT EXISTS vgs CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
--- CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'root';
--- GRANT ALL PRIVILEGES ON vgs.* TO 'user'@'%';
--- SET session wait_timeout=259200;
--- SET global max_allowed_packet=10485760;
-
--- FLUSH PRIVILEGES;
-
--- CREATE TABLE IF NOT EXISTS vgs.hoge1 (id int auto_increment NOT NULL PRIMARY KEY, name varchar(10), index(id));
 DROP DATABASE IF EXISTS test_database;
 CREATE DATABASE test_database;
 USE test_database;
 
 CREATE TABLE users (
 id INT NOT NULL AUTO_INCREMENT,
-username VARCHAR(255) NOT NULL,
+username VARCHAR(255) NOT NULL UNIQUE,
 password VARCHAR(255) NOT NULL,
 file_path VARCHAR(255) NULL,
 PRIMARY KEY (id));
@@ -28,7 +19,7 @@ file_name VARCHAR(255) NOT NULL,
 file_path VARCHAR(255) NOT NULL,
 abstract TEXT NULL,
 user_id INT NOT NULL,
-created_at DATETIME NOT NULL,
+created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 PRIMARY KEY (id));
 
 
