@@ -18,6 +18,12 @@
 # Requirement
 * Docker
 * Docker Compose
+# Preparations
+以下のファイルの中身を修正性.sampleを取り除いたファイルを作成
+- [.sample.env](.sample.env)
+- [config.sample.json](server/backend_python/config.sample.json)
+- [db_config.sample.json](server/backend_go/db_config.sample.json)
+- [config.sample.js](client/Vue3/config.sample.js)
 # Usage
 以下のコマンドでアプリケーションを起動
 ```
