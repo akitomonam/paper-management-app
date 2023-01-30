@@ -38,11 +38,6 @@ type Sessions struct {
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	status := "True"
-	// CORSのアクセス制御を行う
-	w.Header().Set("Access-Control-Allow-Origin", "*")                            // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")                        // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") //  Content-Type, Authorizationヘッダーのみを許可する
-
 	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
 	if r.Method == http.MethodOptions {
 		return

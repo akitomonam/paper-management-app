@@ -102,12 +102,6 @@ func getConfig() Config {
 	return config
 }
 
-// IndexHandler インデックスページを表示するハンドラ
-// func indexHandler(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Add("Content-Type", "text/html")
-// 	http.ServeFile(w, r, "index.html")
-// }
-
 // UploadHandler アップロードを行うハンドラ
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	file.UploadHandler(w, r)
@@ -152,10 +146,6 @@ func sqlConnect(config Config) (database *gorm.DB, err error) {
 
 // APITablesHandler Papersの中身をJSON形式で返すハンドラ
 func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
-	// CORSのアクセス制御を行う
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
 	sessionToken := r.URL.Query().Get("sessionToken")
 	favorite_flag := r.URL.Query().Get("favorite")
 	// sessionToken, _ = url.QueryUnescape(sessionToken)
@@ -217,8 +207,6 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
 	fmt.Println("deleteFileHandlerが呼び出されました")
 
 	fileID, _ := strconv.Atoi(r.URL.Query().Get("fileId"))
@@ -256,10 +244,6 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 // pdfのプレビュー処理
 func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiPreviewHandlerが呼び出されました")
-	// CORSのアクセス制御を行う
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
 	// ファイル名を取得する
 	fileId, err := strconv.Atoi(r.URL.Query().Get("fileId"))
 	fmt.Println("クリックしたファイルのID:", fileId)
@@ -311,9 +295,6 @@ func getFileUrl(fileId int) (string, error) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("loginHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
@@ -386,9 +367,6 @@ func removeSpecialCharacters(s string) string {
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("signupHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
@@ -419,9 +397,6 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userinfoHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
 	sessionToken := r.URL.Query().Get("sessionToken")
 	fmt.Println("sessionToken:", sessionToken)
 
@@ -457,9 +432,6 @@ func userinfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userlistHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
 	type User struct {
 		Username string
 		Filepath string
@@ -495,9 +467,6 @@ func FindSession(sessionToken string) (Sessions, error) {
 }
 
 func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // GETメソッドのみを許可する
-
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -530,10 +499,6 @@ func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiEditPaperInfoHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
-
 	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
 	if r.Method == http.MethodOptions {
 		return
@@ -581,9 +546,6 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiFavoriteHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
 
 	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
 	if r.Method == http.MethodOptions {
@@ -637,8 +599,6 @@ func apiFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 
 func apicheckFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiFavoriteHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // POSTメソッドのみを許可する
 
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -680,8 +640,6 @@ func apicheckFavoriteHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiCommentPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiCommentPreviewHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")    // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "GET") // POSTメソッドのみを許可する
 
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -757,10 +715,6 @@ func apiCommentPreviewHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiCommentAddHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("apiCommentAddHandlerが呼び出されました")
-	w.Header().Set("Access-Control-Allow-Origin", "*")             // 任意のドメインからのアクセスを許可する
-	w.Header().Set("Access-Control-Allow-Methods", "POST")         // POSTメソッドのみを許可する
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Content-Typeヘッダーのみを許可する
-
 	// HTTPメソッドがOPTIONSの場合は、ここで処理を終了する
 	if r.Method == http.MethodOptions {
 		return
@@ -820,24 +774,33 @@ func apiCommentAddHandler(w http.ResponseWriter, r *http.Request) {
 
 func setupRoutes(config Config) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload/file", uploadHandler)
-	mux.HandleFunc("/api/delete", deleteFileHandler)
-	mux.HandleFunc("/api/tables", apiTablesHandler)
-	mux.HandleFunc("/api/preview", apiPreviewHandler)
-	mux.HandleFunc("/api/login", loginHandler)
-	mux.HandleFunc("/api/signup", signupHandler)
-	mux.HandleFunc("/api/userinfo", userinfoHandler)
-	mux.HandleFunc("/api/userlist", userlistHandler)
-	mux.HandleFunc("/api/papers/", apiPapersHandler)
-	mux.HandleFunc("/api/editpaperinfo", apiEditPaperInfoHandler)
-	mux.HandleFunc("/api/favorite", apiFavoriteHandler)
-	mux.HandleFunc("/api/checkFavorite", apicheckFavoriteHandler)
-	mux.HandleFunc("/api/comment_preview", apiCommentPreviewHandler)
-	mux.HandleFunc("/api/comment_add", apiCommentAddHandler)
+	mux.HandleFunc("/upload/file", corsMiddleware(uploadHandler))
+	mux.HandleFunc("/api/delete", corsMiddleware(deleteFileHandler))
+	mux.HandleFunc("/api/tables", corsMiddleware(apiTablesHandler))
+	mux.HandleFunc("/api/preview", corsMiddleware(apiPreviewHandler))
+	mux.HandleFunc("/api/login", corsMiddleware(loginHandler))
+	mux.HandleFunc("/api/signup", corsMiddleware(signupHandler))
+	mux.HandleFunc("/api/userinfo", corsMiddleware(userinfoHandler))
+	mux.HandleFunc("/api/userlist", corsMiddleware(userlistHandler))
+	mux.HandleFunc("/api/papers/", corsMiddleware(apiPapersHandler))
+	mux.HandleFunc("/api/editpaperinfo", corsMiddleware(apiEditPaperInfoHandler))
+	mux.HandleFunc("/api/favorite", corsMiddleware(apiFavoriteHandler))
+	mux.HandleFunc("/api/checkFavorite", corsMiddleware(apicheckFavoriteHandler))
+	mux.HandleFunc("/api/comment_preview", corsMiddleware(apiCommentPreviewHandler))
+	mux.HandleFunc("/api/comment_add", corsMiddleware(apiCommentAddHandler))
 	mux.Handle("/mnt/uploadfiles/", http.StripPrefix("/mnt/uploadfiles", http.FileServer(http.Dir("/mnt/uploadfiles"))))
 
 	if err := http.ListenAndServe(config.GoPort, mux); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		next(w, r)
 	}
 }
 
