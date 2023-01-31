@@ -9,7 +9,8 @@
             </template>
             <el-form>
                 <el-form-item>
-                    <el-input v-model="message" placeholder="Enter your message"></el-input>
+                    <el-input v-model="message" placeholder="Enter your message" clearable
+                        @keydown.enter.prevent="postMessage"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button @click="postMessage" type="primary">Post</el-button>
@@ -89,6 +90,7 @@ export default {
                     console.error(error);
                     alert("コメント投稿APIでエラーが発生しました")
                 });
+            this.message = ""
         },
     },
     watch: {
