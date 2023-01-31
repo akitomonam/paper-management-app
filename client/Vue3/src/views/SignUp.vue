@@ -16,7 +16,7 @@
                 <el-input v-model="username" />
             </el-form-item>
             <el-form-item label="Password">
-                <el-input type="password" autocomplete="off" v-model="password" />
+                <el-input type="password" autocomplete="off" v-model="password" show-password />
             </el-form-item>
             <el-form-item>
                 <div style="margin: 0 auto;">
@@ -73,11 +73,13 @@ export default {
 .box-card {
     width: 480px;
 }
+
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
 .register {
     position: relative;
     top: 100px;

@@ -1,22 +1,22 @@
 <template>
     <el-card class="box-card login">
-            <template #header>
-                <div class="card-header">
-                    <span>Login</span>
-                    <el-button type="text" @click="register">
-                        <el-icon el-icon--left>
-                            <UserFilled />
-                        </el-icon>
-                        Register
-                    </el-button>
-                </div>
-            </template>
+        <template #header>
+            <div class="card-header">
+                <span>Login</span>
+                <el-button type="text" @click="register">
+                    <el-icon el-icon--left>
+                        <UserFilled />
+                    </el-icon>
+                    Register
+                </el-button>
+            </div>
+        </template>
         <el-form :model="form" label-width="120px" style="max-width: 460px">
             <el-form-item label="User name">
                 <el-input v-model="username" />
             </el-form-item>
             <el-form-item label="Password">
-                <el-input type="password" autocomplete="off" v-model="password" />
+                <el-input type="password" autocomplete="off" v-model="password" show-password />
             </el-form-item>
             <el-form-item>
                 <div style="margin: 0 auto;">
