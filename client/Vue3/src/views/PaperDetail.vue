@@ -37,6 +37,17 @@
                     <el-form-item label="Year">
                         <el-input-number v-model="paper.year" class="mx-4" :min="1" controls-position="right" />
                     </el-form-item>
+                    <el-form-item label="Keyword">
+                        <el-tag v-for="(keyword, index) in keywords" :key="index" class="mx-1" closable
+                            :disable-transitions="false" @close="handleClose(index)">
+                            {{ keyword }}
+                        </el-tag>
+                        <el-input v-if="inputVisible" ref="InputRef" v-model="inputValue" class="ml-1 w-20" size="small"
+                            @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
+                        <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput">
+                            + New Keyword
+                        </el-button>
+                    </el-form-item>
                 </el-form>
             </div>
             <!-- 編集前の表示 -->
@@ -44,15 +55,24 @@
                 <div class="rate-block">
                     <el-rate @change="setRating" v-model="rating" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" />
                 </div>
-                <el-descriptions :title="paper.title" column="1" size="default" direction="horizontal" border >
-                    <el-descriptions-item v-if="paper.title==``" label="Title">{{paper.title}}</el-descriptions-item>
-                    <el-descriptions-item label="Abstract">{{paper.abstract}}</el-descriptions-item>
-                    <el-descriptions-item label="Author">{{paper.author}}</el-descriptions-item>
-                    <el-descriptions-item label="Publisher">{{paper.publisher}}</el-descriptions-item>
-                    <el-descriptions-item label="Year">{{paper.year}}</el-descriptions-item>
+                <el-descriptions :title="paper.title" column="1" size="default" direction="horizontal" border>
+                    <el-descriptions-item v-if="paper.title == ``" label="Title">{{
+                        paper.title
+                    }}</el-descriptions-item>
+                    <el-descriptions-item label="Abstract">{{ paper.abstract }}</el-descriptions-item>
+                    <el-descriptions-item label="Author">{{ paper.author }}</el-descriptions-item>
+                    <el-descriptions-item label="Publisher">{{ paper.publisher }}</el-descriptions-item>
+                    <el-descriptions-item label="Year">{{ paper.year }}</el-descriptions-item>
+                    <el-descriptions-item label="Keywords">
+                        <el-tag v-for="keyword in keywords" :key="keyword" class="mx-1"
+                            :disable-transitions="false">
+                            {{ keyword }}
+                        </el-tag>
+                    </el-descriptions-item>
                 </el-descriptions>
             </div>
-            <el-button v-if="editMode" size="small" type="danger" bg text @click="deleteFile(paper.ID)"><el-icon el-icon--left>
+            <el-button v-if="editMode" size="small" type="danger" bg text @click="deleteFile(paper.ID)"><el-icon
+                    el-icon--left>
                     <Delete />
                 </el-icon>Delete</el-button>
         </el-card>
@@ -63,15 +83,15 @@
                 </div>
             </template>
             <el-descriptions column="1" size="default" direction="horizontal" border>
-                <el-descriptions-item label="ID">{{paper.ID}}</el-descriptions-item>
-                <el-descriptions-item label="File name">{{paper.file_name}}</el-descriptions-item>
-                <el-descriptions-item label="Uploader's ID">{{paper.user_id}}</el-descriptions-item>
-                <el-descriptions-item label="Created at">{{paper.created_at}}</el-descriptions-item>
+                <el-descriptions-item label="ID">{{ paper.ID }}</el-descriptions-item>
+                <el-descriptions-item label="File name">{{ paper.file_name }}</el-descriptions-item>
+                <el-descriptions-item label="Uploader's ID">{{ paper.user_id }}</el-descriptions-item>
+                <el-descriptions-item label="Created at">{{ paper.created_at }}</el-descriptions-item>
             </el-descriptions>
         </el-card>
         <br>
         <!-- <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button> -->
-        <CommentComponent :paper_id="paper.ID"/>
+        <CommentComponent :paper_id="paper.ID" />
         <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
     </div>
 </template>
@@ -102,6 +122,9 @@ export default {
                 year: '',
                 bibtex: '',
             },
+            keywords: [],
+            inputValue: "",
+            inputVisible: false,
             editMode: false,
             rating: 0,
             isLoading: false,
@@ -287,6 +310,19 @@ export default {
                     alert("お気に入りAPIでエラーが発生しました")
                 });
         },
+        showInput() {
+            this.inputVisible = true
+        },
+        handleClose(index) {
+            this.keywords.splice(index, 1)
+        },
+        handleInputConfirm() {
+            if (this.inputValue) {
+                this.keywords.push(this.inputValue)
+            }
+            this.inputVisible = false
+            this.inputValue = ''
+        }
     },
 }
 </script>
@@ -297,6 +333,7 @@ export default {
     justify-content: space-between;
     align-items: center;
 }
+
 .box-card {
     width: auto;
     margin: 10px;
