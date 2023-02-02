@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -66,9 +67,10 @@ type Favorites struct {
 }
 
 type Keywords struct {
-	ID      int    `db:"id"`
-	Paperid int    `db:"paper_id"`
-	Keyword string `db:"keyword"`
+	ID       int    `db:"id"`
+	Paper_id int    `db:"paper_id"`
+	Keyword  string `db:"keyword"`
+	Flag     bool   `db:"flag"`
 }
 
 type Sessions struct {
@@ -486,10 +488,30 @@ func apiPapersHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
 		return
 	}
-	// 論文の情報をすべて返す
-	res, err := json.Marshal(Paper)
+	//keywordsデータベースから該当するidでflagがtrueのものを取得する
+	var Keyword []Keywords
+	if err := db.Where("paper_id = ? AND flag = ?", id, true).Find(&Keyword).Error; err != nil {
+		fmt.Println("レコードが見つかりません")
+		fmt.Println("レコードが見つかりません:", err)
+		// レスポンスを返す
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
+		return
+	}
+
+	// 論文情報とkeywordをまとめて返す
+	type PaperInfo struct {
+		Paper    Papers
+		Keywords []Keywords
+	}
+	paperInfo := PaperInfo{
+		Paper:    Paper,
+		Keywords: Keyword,
+	}
+
+	res, err := json.Marshal(paperInfo)
 	if err != nil {
-		fmt.Println("エラー(Paper):", err)
+		fmt.Println("エラー:", err)
 		return
 	}
 
@@ -504,16 +526,34 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(r.FormValue("id"))
+	//To allocate slice for request body
+	length, err := strconv.Atoi(r.Header.Get("Content-Length"))
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	title := r.FormValue("title")
-	abstract := r.FormValue("abstract")
-	author := r.FormValue("author")
-	publisher := r.FormValue("publisher")
-	year, err := strconv.Atoi(r.FormValue("year"))
+
+	//Read body data to parse json
+	body := make([]byte, length)
+	length, err = r.Body.Read(body)
+	if err != nil && err != io.EOF {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//parse json
+	var jsonBody map[string]interface{}
+	err = json.Unmarshal(body[:length], &jsonBody)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	id := int(jsonBody["id"].(float64))
+	title := jsonBody["title"].(string)
+	abstract := jsonBody["abstract"].(string)
+	author := jsonBody["author"].(string)
+	publisher := jsonBody["publisher"].(string)
+	year := int(jsonBody["year"].(float64))
 	if err != nil {
 		http.Error(w, "Invalid Year", http.StatusBadRequest)
 		return
@@ -538,6 +578,22 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("エラー(paper):", err)
 		return
+	}
+
+	for _, keyword := range jsonBody["keywords"].([]interface{}) {
+		kw, _ := keyword.(map[string]interface{})
+		fmt.Println(kw["Keyword"], ":", kw["Flag"])
+		fmt.Printf("flag:%T\n", kw["Flag"])
+		//DBに反映する(DBに同じキーワードと同じidが存在しない場合は新規追加する、存在していた場合はflagを更新する)
+		var keyword Keywords
+		if err := db.Where("keyword = ? AND paper_id = ?", kw["Keyword"], id).First(&keyword).Error; err != nil {
+			//新規追加
+			db.Create(&Keywords{Keyword: kw["Keyword"].(string), Paper_id: id, Flag: kw["Flag"].(bool)})
+		} else {
+			//更新
+			keyword.Flag = kw["Flag"].(bool)
+			db.Save(&keyword)
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

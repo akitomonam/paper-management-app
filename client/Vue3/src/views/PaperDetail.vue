@@ -14,7 +14,7 @@
                     <el-button v-if="!editMode" class="button" text @click="showFile(paper.ID)"><el-icon el-icon--left>
                             <View />
                         </el-icon>Preview</el-button>
-                    <el-button class="button" text @click="editMode = !editMode"><el-icon el-icon--left>
+                    <el-button v-if="!editMode" class="button" text @click="editMode = !editMode"><el-icon el-icon--left>
                             <Edit />
                         </el-icon>Edit</el-button>
                 </div>
@@ -37,11 +37,15 @@
                     <el-form-item label="Year">
                         <el-input-number v-model="paper.year" class="mx-4" :min="1" controls-position="right" />
                     </el-form-item>
-                    <el-form-item label="Keyword">
-                        <el-tag v-for="(keyword, index) in keywords" :key="index" class="mx-1" closable
-                            :disable-transitions="false" @close="handleClose(index)">
-                            {{ keyword }}
+                    <el-form-item label="Keywords">
+                        <template v-for="(item, index) in keywords">
+                            <template v-if="item.Flag">
+                        <el-tag :key="index" class="mx-1" closable :disable-transitions="false"
+                            @close="handleClose(index)">
+                            {{ item.Keyword }}
                         </el-tag>
+                        </template>
+                        </template>
                         <el-input v-if="inputVisible" ref="InputRef" v-model="inputValue" class="ml-1 w-20" size="small"
                             @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
                         <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput">
@@ -56,17 +60,17 @@
                     <el-rate @change="setRating" v-model="rating" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" />
                 </div>
                 <el-descriptions :title="paper.title" column="1" size="default" direction="horizontal" border>
-                    <el-descriptions-item v-if="paper.title == ``" label="Title">{{
-                        paper.title
-                    }}</el-descriptions-item>
+                    <el-descriptions-item v-if="paper.title == ``" label="Title">
+                    {{paper.title}}
+                    </el-descriptions-item>
                     <el-descriptions-item label="Abstract">{{ paper.abstract }}</el-descriptions-item>
                     <el-descriptions-item label="Author">{{ paper.author }}</el-descriptions-item>
                     <el-descriptions-item label="Publisher">{{ paper.publisher }}</el-descriptions-item>
                     <el-descriptions-item label="Year">{{ paper.year }}</el-descriptions-item>
                     <el-descriptions-item label="Keywords">
-                        <el-tag v-for="keyword in keywords" :key="keyword" class="mx-1"
+                        <el-tag v-for="item in filteredKeywords" :key="item" class="mx-1"
                             :disable-transitions="false">
-                            {{ keyword }}
+                            {{ item.Keyword }}
                         </el-tag>
                     </el-descriptions-item>
                 </el-descriptions>
@@ -130,11 +134,16 @@ export default {
             isLoading: false,
         }
     },
+    computed: {
+        filteredKeywords() {
+            return this.keywords.filter(item => item.Flag);
+        }
+    },
     created() {
         axios.get(`${config.URL}:${config.PORT}/api/papers/${this.id}`)
             .then(response => {
-                this.paper = response.data
-                console.log(this.paper)
+                this.paper = response.data.Paper
+                this.keywords = response.data.Keywords
                 axios.get(`${config.URL}:${config.PORT}/api/checkFavorite`,
                     {
                         params: {
@@ -200,7 +209,7 @@ export default {
             let author = this.paper.author
             let publisher = this.paper.publisher
             let year = this.paper.year
-
+            let keywords = this.keywords
             // データベースに反映する
             await axios
                 .post(
@@ -211,11 +220,12 @@ export default {
                         abstract: abstract,
                         author: author,
                         publisher: publisher,
-                        year: year
+                        year: year,
+                        keywords: keywords
                     },
                     {
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
+                            'Content-Type': 'application/json'
                         }
                     }
                 )
@@ -314,12 +324,25 @@ export default {
             this.inputVisible = true
         },
         handleClose(index) {
-            this.keywords.splice(index, 1)
+            console.log("index:", index)
+            this.keywords[index]["Flag"] = false
+            console.log("this.keywords:", this.keywords)
         },
         handleInputConfirm() {
             if (this.inputValue) {
-                this.keywords.push(this.inputValue)
+                // ここでkeywordsのキーでinputValueが存在していた場合でflagがfalseの場合はflagをtrueにする
+                // inputValueが存在していてflagがtrueの場合はalertを出す
+                if (this.keywords.some((keyword) => keyword.keyword === this.inputValue)) {
+                    if (this.keywords.some((keyword) => keyword.keyword === this.inputValue && keyword.Flag === false)) {
+                        this.keywords.find((keyword) => keyword.keyword === this.inputValue)["Flag"] = true
+                    } else {
+                        alert("すでに存在するキーワードです")
+                    }
+                } else {
+                    this.keywords.push({"Keyword":this.inputValue, "Flag":true})
+                }
             }
+            console.log("keywords:", this.keywords)
             this.inputVisible = false
             this.inputValue = ''
         }
