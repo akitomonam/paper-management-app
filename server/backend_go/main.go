@@ -553,11 +553,7 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 	abstract := jsonBody["abstract"].(string)
 	author := jsonBody["author"].(string)
 	publisher := jsonBody["publisher"].(string)
-	year, _ := strconv.Atoi(jsonBody["year"].(string))
-	if err != nil {
-		http.Error(w, "Invalid Year", http.StatusBadRequest)
-		return
-	}
+	year := int(jsonBody["year"].(float64))
 
 	// id を使って、DB から論文の詳細情報を取得して、「Title,Author,Publisher,Year,Abstract」を更新する
 	var paper Papers

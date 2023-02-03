@@ -41,9 +41,9 @@ def extract_information_from_xml_file(file_path):
         info_dict["abstract"] = ""
     year = re.search(r'\d{4}$', soup.find("date").text)
     if year:
-        info_dict["year"] = year.group()
+        info_dict["year"] = int(year.group())
     else:
-        info_dict["year"] = "1"
+        info_dict["year"] = 1
     authors = soup.find_all("author")
     author_list = []
     for author in authors:
