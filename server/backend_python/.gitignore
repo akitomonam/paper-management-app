@@ -6,3 +6,4 @@ grobid_client_python
 .vscode-server
 config.json
 .python_history
+tmp

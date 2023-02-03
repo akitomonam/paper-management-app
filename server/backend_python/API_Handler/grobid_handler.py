@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import sys
 import os
+import re
 from bs4 import BeautifulSoup
 sys.path.append('../grobid_client_python')
 from grobid_client.grobid_client_one_file import GrobidClient as GCOne
@@ -32,6 +33,17 @@ def extract_information_from_xml_file(file_path):
         soup = BeautifulSoup(f, "lxml-xml")
 
     info_dict["title"] = soup.find("title").text
+    # info_dict["abstract"] = soup.find("abstract").find("p").text
+    abstract = soup.find("abstract").find("p")
+    if abstract:
+        info_dict["abstract"] = abstract.text
+    else:
+        info_dict["abstract"] = ""
+    year = re.search(r'\d{4}$', soup.find("date").text)
+    if year:
+        info_dict["year"] = year.group()
+    else:
+        info_dict["year"] = "1"
     authors = soup.find_all("author")
     author_list = []
     for author in authors:

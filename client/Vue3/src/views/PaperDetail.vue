@@ -266,10 +266,10 @@ export default {
                     console.log("自動補完が完了しました");
                     // 画面上の文字列を更新する
                     this.paper.title = response.data.title;
-                    // this.paper.abstract = response.data.abstract;
+                    this.paper.abstract = response.data.abstract;
                     this.paper.author = response.data.author;
+                    this.paper.year = response.data.year;
                     // this.paper.publisher = response.data.publisher;
-                    // this.paper.year = response.data.year;
                     // this.editMode = false;
                 })
                 .catch((error) => {

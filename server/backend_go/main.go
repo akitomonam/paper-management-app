@@ -553,7 +553,7 @@ func apiEditPaperInfoHandler(w http.ResponseWriter, r *http.Request) {
 	abstract := jsonBody["abstract"].(string)
 	author := jsonBody["author"].(string)
 	publisher := jsonBody["publisher"].(string)
-	year := int(jsonBody["year"].(float64))
+	year, _ := strconv.Atoi(jsonBody["year"].(string))
 	if err != nil {
 		http.Error(w, "Invalid Year", http.StatusBadRequest)
 		return
