@@ -24,6 +24,7 @@
 
 <script>
 import { config } from "../../config";
+import { ElNotification } from "element-plus";
 
 export default {
   name: "UploadForm",
@@ -43,11 +44,20 @@ export default {
   methods: {
     handleSuccess() {
       // アップロード成功時の処理を記述する
+      ElNotification({
+        title: "Success",
+        message: "Upload succeeded",
+        type: "success",
+      });
       this.$emit("update-upload-status"); // レスポンスボディのfilenameを参照して、responseMessageに代入する
     },
     handleError(error) {
       // エラー時の処理を記述する
-      alert(`エラーが発生しました: ${error.message}`);
+      ElNotification({
+        title: "Error",
+        message: `Error: ${error.message}`,
+        type: "error",
+      });
     },
   },
 };
