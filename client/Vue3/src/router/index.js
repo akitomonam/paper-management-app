@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import PaperManagement from "../views/HomePage.vue";
+import { ElNotification } from "element-plus";
 
 const routes = [
     {
@@ -18,7 +19,11 @@ const routes = [
             const sessionToken = localStorage.getItem('sessionToken')
             console.log("sessionToken:", !!sessionToken)
             if (sessionToken) {
-                alert("既にログインしています")
+                ElNotification({
+                    title: 'Warning',
+                    message: `Already logged in`,
+                    type: 'warning',
+                });
                 from()
             } else {
                 next()
@@ -67,7 +72,11 @@ const router = createRouter({
 router.beforeEach((to) => {
     const sessionToken = localStorage.getItem('sessionToken')
     if (to.meta.requiresAuth && sessionToken == null) {
-        alert("ログインしてください")
+        ElNotification({
+            title: 'Warning',
+            message: `Please login`,
+            type: 'warning',
+        });
         return { name: "LoginView" };
     }
 });

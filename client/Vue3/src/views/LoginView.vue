@@ -78,7 +78,7 @@ export default {
           // ログインが失敗した場合、エラーメッセージを表示する
           ElNotification({
             title: "Error",
-            message: `Error: ${response.data.message}`,
+            message: `${response.data.message}`,
             type: "error",
           });
         }

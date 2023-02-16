@@ -110,9 +110,13 @@
                 <View />
               </el-icon>{{ item.file_name }}
             </el-button>
-            <el-button plain type="info" @click="deleteSupportFile(item.ID)"><el-icon>
-                <Delete />
-              </el-icon></el-button>
+            <el-popconfirm title="Are you sure to delete this?" @confirm="deleteSupportFile(item.ID)">
+              <template #reference>
+                <el-button plain type="info"><el-icon>
+                    <Delete />
+                  </el-icon></el-button>
+              </template>
+            </el-popconfirm>
           </el-button-group>
         </el-descriptions-item>
       </el-descriptions>
@@ -259,27 +263,25 @@ export default {
     },
     async deleteSupportFile(targetFileId) {
       console.log("targetFileId:", targetFileId);
-      if (confirm("本当に削除しますか？")) {
-        try {
-          const response = await axios.get(
-            `${config.URL}:${config.PORT}/api/deleteSupportFile?fileId=${targetFileId}`
-          );
-          if (response.data) {
-            // レスポンスボディが存在する場合
-            console.log("response.data", response.data);
-            if (response.data.result == "true") {
-              // alert("ファイル削除に成功しました。")
-              this.$emit("update-tables"); // 親コンポーネントに発火
-              this.getDB();
-            } else {
-              alert("ファイル削除に失敗しました。");
-            }
+      try {
+        const response = await axios.get(
+          `${config.URL}:${config.PORT}/api/deleteSupportFile?fileId=${targetFileId}`
+        );
+        if (response.data) {
+          // レスポンスボディが存在する場合
+          console.log("response.data", response.data);
+          if (response.data.result == "true") {
+            // alert("ファイル削除に成功しました。")
+            this.$emit("update-tables"); // 親コンポーネントに発火
+            this.getDB();
           } else {
-            console.error("レスポンスボディが存在しません");
+            alert("ファイル削除に失敗しました。");
           }
-        } catch {
-          console.log("File delete Failed");
+        } else {
+          console.error("レスポンスボディが存在しません");
         }
+      } catch {
+        console.log("File delete Failed");
       }
     },
     // 編集処理
