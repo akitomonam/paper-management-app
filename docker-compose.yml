@@ -16,6 +16,9 @@ services:
       - ./server/uploadfiles:/mnt/uploadfiles
     depends_on:
       - 'db-mysql'
+    networks:
+      - app_net
+
   # grobid server
   server-grobid:
     build:
@@ -29,6 +32,9 @@ services:
     volumes:
       - ./server/backend_grobid:/workspace
     runtime: nvidia
+    networks:
+      - app_net
+
   # backend python
   backend-python:
     build:
@@ -44,9 +50,19 @@ services:
       - ./server/uploadfiles:/mnt/uploadfiles
     # command: sh -c "cd /root/ && rm -rf /root/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /root/grobid_client_python && python setup.py install"
     # とりあえずコンテナが停止しないように「tail -f /dev/null」
-    entrypoint: ["sh", "-c", "cd /workspace && rm -rf /workspace/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /workspace/grobid_client_python && python setup.py install && cd /workspace/API_Handler && python grobid_handler.py"]
-    # stdin_open: true
-  # client
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "cd /workspace && rm -rf /workspace/grobid_client* && git clone https://github.com/akitomonam/grobid_client_python.git && cd /workspace/grobid_client_python && python setup.py install && cd /workspace/API_Handler && python grobid_handler.py"
+      ]
+    runtime: nvidia
+    networks:
+      - app_net
+      # stdin_open: true
+
+
+      # client
   client-vue:
     build:
       context: ./client
@@ -58,6 +74,9 @@ services:
     volumes:
       - ./client:/workspace
     command: sh -c "cd /workspace/Vue3 && npm install && npm run build && npm run serve"
+    networks:
+      - app_net
+
   # DB
   db-mysql:
     build:
@@ -73,5 +92,18 @@ services:
       # - MYSQL_USER=${DB_USER}
       # - TZ=${TZ}
     volumes:
-      - ./db/mysql-store:/var/lib/mysql  # データ永続化
+      - ./db/mysql-store:/var/lib/mysql # データ永続化
       - ./db/mysql-logs:/var/log/mysql
+    depends_on:
+      - 'db-mysql'
+    networks:
+      app_net:
+        ipv4_address: 172.30.0.2
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/24
