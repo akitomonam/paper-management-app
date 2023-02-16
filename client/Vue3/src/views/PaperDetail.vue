@@ -5,35 +5,23 @@
       <template #header>
         <div class="card-header">
           <span>Paper infomation</span>
-          <el-button v-if="editMode" class="button" text @click="editAutoPaper"
-            ><el-icon> <MagicStick /> </el-icon>Auto</el-button
-          >
-          <el-button v-if="editMode" class="button" text @click="editPaper"
-            ><el-icon el-icon--left> <Finished /> </el-icon>Comlete</el-button
-          >
-          <el-button
-            v-if="!editMode"
-            class="button"
-            text
-            @click="showFile(paper.ID)"
-            ><el-icon el-icon--left> <View /> </el-icon>Preview</el-button
-          >
-          <el-button
-            v-if="!editMode"
-            class="button"
-            text
-            @click="editMode = !editMode"
-            ><el-icon el-icon--left> <Edit /> </el-icon>Edit</el-button
-          >
+          <el-button v-if="editMode" class="button" text @click="editAutoPaper"><el-icon>
+              <MagicStick />
+            </el-icon>Auto</el-button>
+          <el-button v-if="editMode" class="button" text @click="editPaper"><el-icon el-icon--left>
+              <Finished />
+            </el-icon>Comlete</el-button>
+          <el-button v-if="!editMode" class="button" text @click="showFile(paper.ID)"><el-icon el-icon--left>
+              <View />
+            </el-icon>Preview</el-button>
+          <el-button v-if="!editMode" class="button" text @click="editMode = !editMode"><el-icon el-icon--left>
+              <Edit />
+            </el-icon>Edit</el-button>
         </div>
       </template>
       <div v-if="editMode">
-        <el-form
-          :label-position="labelPosition"
-          label-width="100px"
-          :model="formLabelAlign"
-          style="max-width: 460px  text-align: center;"
-        >
+        <el-form :label-position="labelPosition" label-width="100px" :model="formLabelAlign"
+          style="max-width: 460px  text-align: center;">
           <el-form-item label="Title">
             <el-input v-model="paper.title" />
           </el-form-item>
@@ -47,43 +35,20 @@
             <el-input v-model="paper.publisher" />
           </el-form-item>
           <el-form-item label="Year">
-            <el-input-number
-              v-model="paper.year"
-              class="mx-4"
-              :min="1"
-              controls-position="right"
-            />
+            <el-input-number v-model="paper.year" class="mx-4" :min="1" controls-position="right" />
           </el-form-item>
           <el-form-item label="Keywords">
             <template v-for="(item, index) in keywords">
               <template v-if="item.Flag">
-                <el-tag
-                  :key="index"
-                  class="mx-1"
-                  closable
-                  :disable-transitions="false"
-                  @close="handleClose(index)"
-                  style="margin-right: 5px"
-                >
+                <el-tag :key="index" class="mx-1" closable :disable-transitions="false" @close="handleClose(index)"
+                  style="margin-right: 5px">
                   {{ item.Keyword }}
                 </el-tag>
               </template>
             </template>
-            <el-input
-              v-if="inputVisible"
-              ref="InputRef"
-              v-model="inputValue"
-              class="ml-1 w-20"
-              size="small"
-              @keyup.enter="handleInputConfirm"
-              @blur="handleInputConfirm"
-            />
-            <el-button
-              v-else
-              class="button-new-tag ml-1"
-              size="small"
-              @click="showInput"
-            >
+            <el-input v-if="inputVisible" ref="InputRef" v-model="inputValue" class="ml-1 w-20" size="small"
+              @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
+            <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput">
               + New Keyword
             </el-button>
           </el-form-item>
@@ -92,19 +57,9 @@
       <!-- 編集前の表示 -->
       <div v-else>
         <div class="rate-block">
-          <el-rate
-            @change="setRating"
-            v-model="rating"
-            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-          />
+          <el-rate @change="setRating" v-model="rating" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" />
         </div>
-        <el-descriptions
-          :title="paper.title"
-          column="1"
-          size="default"
-          direction="horizontal"
-          border
-        >
+        <el-descriptions :title="paper.title" column="1" size="default" direction="horizontal" border>
           <el-descriptions-item v-if="paper.title == ``" label="Title">
             {{ paper.title }}
           </el-descriptions-item>
@@ -121,27 +76,16 @@
             paper.year
           }}</el-descriptions-item>
           <el-descriptions-item label="Keywords">
-            <el-tag
-              v-for="item in filteredKeywords"
-              :key="item"
-              class="mx-1"
-              :disable-transitions="false"
-              style="margin-right: 5px"
-            >
+            <el-tag v-for="item in filteredKeywords" :key="item" class="mx-1" :disable-transitions="false"
+              style="margin-right: 5px">
               {{ item.Keyword }}
             </el-tag>
           </el-descriptions-item>
         </el-descriptions>
       </div>
-      <el-button
-        v-if="editMode"
-        size="small"
-        type="danger"
-        bg
-        text
-        @click="deleteFile(paper.ID)"
-        ><el-icon el-icon--left> <Delete /> </el-icon>Delete</el-button
-      >
+      <el-button v-if="editMode" size="small" type="danger" bg text @click="deleteFile(paper.ID)"><el-icon el-icon--left>
+          <Delete />
+        </el-icon>Delete</el-button>
     </el-card>
     <el-card class="box-card">
       <template #header>
@@ -161,39 +105,27 @@
           paper.created_at
         }}</el-descriptions-item>
         <el-descriptions-item label="Support files">
-          <el-button-group
-            v-for="item in supportFiles"
-            :key="item"
-            style="margin-right: 5px"
-          >
-            <el-button
-              class="button"
-              type="info"
-              plain
-              @click="showSupportFile(item.ID)"
-              ><el-icon el-icon--left> <View /> </el-icon>{{ item.file_name }}
+          <el-button-group v-for="item in supportFiles" :key="item" style="margin-right: 5px">
+            <el-button class="button" type="info" plain @click="showSupportFile(item.ID)"><el-icon el-icon--left>
+                <View />
+              </el-icon>{{ item.file_name }}
             </el-button>
-            <el-button plain type="info" @click="deleteSupportFile(item.ID)"
-              ><el-icon><Delete /></el-icon
-            ></el-button>
+            <el-button plain type="info" @click="deleteSupportFile(item.ID)"><el-icon>
+                <Delete />
+              </el-icon></el-button>
           </el-button-group>
         </el-descriptions-item>
       </el-descriptions>
+      <UploadForm :paperId="paper.ID" @update-upload-status="getDB" />
       <el-button type="success" text bg @click="pdfTranslate">
         PDF Translater
       </el-button>
-      <UploadForm :paperId="paper.ID" @update-upload-status="getDB" />
     </el-card>
     <br />
     <!-- <button class="get-bibtex-button" @click="getBibTeX(paper.ID)">GetBibTeX</button> -->
     <CommentComponent :paper_id="paper.ID" />
-    <vue-element-loading
-      :active="isLoading"
-      is-full-screen
-      text="Now loading..."
-      size="128"
-    />
-  </div>
+    <vue-element-loading :active="isLoading" is-full-screen text="Now loading..." size="128" />
+</div>
 </template>
 
 <script>
