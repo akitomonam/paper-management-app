@@ -59,8 +59,9 @@ services:
     runtime: nvidia
     networks:
       - app_net
+    depends_on:
+      - 'db-mysql'
       # stdin_open: true
-
 
       # client
   client-vue:
@@ -94,8 +95,6 @@ services:
     volumes:
       - ./db/mysql-store:/var/lib/mysql # データ永続化
       - ./db/mysql-logs:/var/log/mysql
-    depends_on:
-      - 'db-mysql'
     networks:
       app_net:
         ipv4_address: 172.30.0.2
