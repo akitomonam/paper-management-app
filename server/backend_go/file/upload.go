@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,7 +29,20 @@ type Papers struct {
 	File_path  string    `json:"file_path"`
 	User_id    int       `json:"user_id"`
 	Created_at time.Time `gorm:"not null"`
-	// Createdat time.Time `json:"created_at" sql:"not null;type:datetime"`
+}
+
+type supportFiles struct {
+	ID         int
+	PaperId    int       `json:"paperId"`
+	Title      string    `json:"title"`
+	Author     string    `json:"author"`
+	Publisher  string    `json:"publisher"`
+	Year       int       `json:"year"`
+	Abstract   string    `json:"abstract"`
+	File_name  string    `json:"file_name"`
+	File_path  string    `json:"file_path"`
+	User_id    int       `json:"user_id"`
+	Created_at time.Time `gorm:"not null"`
 }
 
 type Sessions struct {
@@ -46,7 +60,9 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// セッショントークンを受け取る
 	sessionToken := r.Header.Get("Authorization")
 	sessionToken = strings.TrimSpace(strings.TrimPrefix(sessionToken, "Bearer "))
-	fmt.Println("sessionToken:", sessionToken)
+	paperId := r.Header.Get("paperId")
+	paperIdInt, err := strconv.Atoi(paperId)
+
 	// セッションDBを検索
 	session, err := FindSession(sessionToken)
 	if err != nil {
@@ -155,7 +171,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//DBにパスなどのメタ情報を保存
-	add2sql(filename, savePath, user_id)
+	add2sql(paperIdInt, filename, savePath, user_id)
 
 	// アップロード成功のレスポンスを返す
 	response := map[string]string{
@@ -178,7 +194,7 @@ func sqlConnect() (database *gorm.DB, err error) {
 	return gorm.Open(DBMS, CONNECT)
 }
 
-func add2sql(file_name string, file_path string, user_id int) {
+func add2sql(paperId int, file_name string, file_path string, user_id int) {
 	db, err := sqlConnect()
 	if err != nil {
 		panic(err.Error())
@@ -187,15 +203,29 @@ func add2sql(file_name string, file_path string, user_id int) {
 	}
 	defer db.Close()
 
-	error := db.Create(&Papers{
-		File_name: file_name,
-		File_path: file_path,
-		User_id:   user_id,
-	}).Error
-	if error != nil {
-		fmt.Println(error)
+	if paperId == 0 {
+		error := db.Create(&Papers{
+			File_name: file_name,
+			File_path: file_path,
+			User_id:   user_id,
+		}).Error
+		if error != nil {
+			fmt.Println(error)
+		} else {
+			fmt.Println("データ追加成功")
+		}
 	} else {
-		fmt.Println("データ追加成功")
+		error := db.Create(&supportFiles{
+			PaperId:   paperId,
+			File_name: file_name,
+			File_path: file_path,
+			User_id:   user_id,
+		}).Error
+		if error != nil {
+			fmt.Println(error)
+		} else {
+			fmt.Println("データ追加成功")
+		}
 	}
 }
 

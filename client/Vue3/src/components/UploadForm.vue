@@ -29,6 +29,12 @@ import { ElNotification } from "element-plus";
 export default {
   name: "UploadForm",
   components: {},
+  props: {
+    paperId: {
+      type: Number,
+      default: 0,
+    },
+  },
   data() {
     return {
       uploadUrl: `${config.URL}:${config.PORT}/upload/file`,
@@ -38,7 +44,7 @@ export default {
   computed: {
     authHeaders() {
       const token = localStorage.getItem("sessionToken");
-      return { Authorization: "Bearer " + token };
+      return { Authorization: "Bearer " + token, paperId: this.paperId };
     },
   },
   methods: {
@@ -46,7 +52,7 @@ export default {
       // アップロード成功時の処理を記述する
       ElNotification({
         title: "Success",
-        message: "Upload succeeded",
+        message: `Upload succeeded`,
         type: "success",
       });
       this.$emit("update-upload-status"); // レスポンスボディのfilenameを参照して、responseMessageに代入する

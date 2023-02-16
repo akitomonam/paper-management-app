@@ -51,6 +51,20 @@ type Papers struct {
 	Created_at time.Time `gorm:"not null"`
 }
 
+type supportFiles struct {
+	ID         int
+	PaperId    int       `json:"paperId"`
+	Title      string    `json:"title"`
+	Author     string    `json:"author"`
+	Publisher  string    `json:"publisher"`
+	Year       int       `json:"year"`
+	Abstract   string    `json:"abstract"`
+	File_name  string    `json:"file_name"`
+	File_path  string    `json:"file_path"`
+	User_id    int       `json:"user_id"`
+	Created_at time.Time `gorm:"not null"`
+}
+
 type Comment struct {
 	ID        int       `gorm:"primary_key;auto_increment"`
 	PaperID   int       `gorm:"not null"`
@@ -208,6 +222,28 @@ func apiTablesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func apiSupportFilesHandler(w http.ResponseWriter, r *http.Request) {
+	paperId := r.URL.Query().Get("paperId")
+	fmt.Println("paperId:", paperId)
+
+	var fileDbs []supportFiles
+	//paperIdを使用して、supportFilesからレコードを取得する
+	if err := db.Where("paper_id = ?", paperId).Find(&fileDbs).Error; err != nil {
+		// エラーを出力する
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Papersの中身をJSON形式で返す
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(fileDbs); err != nil {
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("deleteFileHandlerが呼び出されました")
 
@@ -215,6 +251,41 @@ func deleteFileHandler(w http.ResponseWriter, r *http.Request) {
 	// 削除対象のファイルを特定し、削除する処理を実行する
 	// PapersテーブルからIDを指定してレコードを取得する
 	var fileDb Papers
+	if err := db.Where("id = ?", fileID).First(&fileDb).Error; err != nil {
+		// http.Error(w, "レコードが見つかりません", http.StatusNotFound)
+		fmt.Println("レコードが見つかりません")
+		fmt.Println("レコードが見つかりません:", err)
+		// レスポンスを返す
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"result": "false"})
+		return
+	}
+	// Papersテーブルからレコードを削除する
+	fmt.Println("filedb:", &fileDb)
+	if err := db.Delete(&fileDb).Error; err != nil {
+		http.Error(w, "データの削除に失敗しました", http.StatusInternalServerError)
+		fmt.Println("データの削除に失敗しました")
+		return
+	}
+	//DBから取得したファイルパスでファイルの削除
+	if err := os.Remove(fileDb.File_path); err != nil {
+		http.Error(w, "ファイルの削除に失敗しました", http.StatusInternalServerError)
+		fmt.Println("ファイルの削除に失敗しました")
+		return
+	}
+	// レスポンスを返す
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"result": "true"})
+	fmt.Println("finish deletefile")
+}
+
+func deleteSupportFileHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("deleteFileHandlerが呼び出されました")
+
+	fileID, _ := strconv.Atoi(r.URL.Query().Get("fileId"))
+	// 削除対象のファイルを特定し、削除する処理を実行する
+	// PapersテーブルからIDを指定してレコードを取得する
+	var fileDb supportFiles
 	if err := db.Where("id = ?", fileID).First(&fileDb).Error; err != nil {
 		// http.Error(w, "レコードが見つかりません", http.StatusNotFound)
 		fmt.Println("レコードが見つかりません")
@@ -277,6 +348,39 @@ func apiPreviewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func apiPreviewSupportFileHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("apiPreviewHandlerが呼び出されました")
+	// ファイル名を取得する
+	fileId, err := strconv.Atoi(r.URL.Query().Get("fileId"))
+	fmt.Println("クリックしたファイルのID:", fileId)
+
+	// ファイルのURLを取得する
+	fileUrl, err := getSupportFileUrl(fileId)
+	//適したURLの形にする
+	// fileUrl = fileUrl[1:]
+	fmt.Println("fileUrl:", fileUrl)
+	if err != nil {
+		// エラーを出力する
+		fmt.Println("エラー:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		// レスポンスボディを作成する
+		responseBody, err := json.Marshal(map[string]string{
+			"fileUrl": fileUrl,
+		})
+		if err != nil {
+			// エラーを出力する
+			fmt.Println("エラー:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// レスポンスを送信する
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(responseBody)
+	}
+}
+
 // ファイルのURLを取得する関数
 func getFileUrl(fileId int) (string, error) {
 	// ファイルのURLを格納する変数
@@ -284,6 +388,24 @@ func getFileUrl(fileId int) (string, error) {
 
 	// Papersから指定したファイル名のレコードを1件取得する
 	var fileDb Papers
+	if err := db.Where("id = ?", fileId).First(&fileDb).Error; err != nil {
+		fmt.Println("エラー(getFileUrl):", err)
+		return "", err
+	}
+
+	// 取得したレコードのfilepathをfileUrlに代入する
+	fileUrl = fileDb.File_path
+
+	return fileUrl, nil
+}
+
+// ファイルのURLを取得する関数
+func getSupportFileUrl(fileId int) (string, error) {
+	// ファイルのURLを格納する変数
+	var fileUrl string
+
+	// Papersから指定したファイル名のレコードを1件取得する
+	var fileDb supportFiles
 	if err := db.Where("id = ?", fileId).First(&fileDb).Error; err != nil {
 		fmt.Println("エラー(getFileUrl):", err)
 		return "", err
@@ -828,8 +950,11 @@ func setupRoutes(config Config) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/upload/file", corsMiddleware(uploadHandler))
 	mux.HandleFunc("/api/delete", corsMiddleware(deleteFileHandler))
+	mux.HandleFunc("/api/deleteSupportFile", corsMiddleware(deleteSupportFileHandler))
 	mux.HandleFunc("/api/tables", corsMiddleware(apiTablesHandler))
+	mux.HandleFunc("/api/supportFiles", corsMiddleware(apiSupportFilesHandler))
 	mux.HandleFunc("/api/preview", corsMiddleware(apiPreviewHandler))
+	mux.HandleFunc("/api/previewSupportFile", corsMiddleware(apiPreviewSupportFileHandler))
 	mux.HandleFunc("/api/login", corsMiddleware(loginHandler))
 	mux.HandleFunc("/api/signup", corsMiddleware(signupHandler))
 	mux.HandleFunc("/api/userinfo", corsMiddleware(userinfoHandler))
@@ -851,7 +976,7 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, paperId")
 		next(w, r)
 	}
 }
