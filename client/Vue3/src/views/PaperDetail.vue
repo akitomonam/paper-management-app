@@ -174,11 +174,14 @@
               ><el-icon el-icon--left> <View /> </el-icon>{{ item.file_name }}
             </el-button>
             <el-button plain type="info" @click="deleteSupportFile(item.ID)"
-              ><el-icon><Close /></el-icon
+              ><el-icon><Delete /></el-icon
             ></el-button>
           </el-button-group>
         </el-descriptions-item>
       </el-descriptions>
+      <el-button type="success" text bg @click="pdfTranslate">
+        PDF Translater
+      </el-button>
       <UploadForm :paperId="paper.ID" @update-upload-status="getDB" />
     </el-card>
     <br />
@@ -199,6 +202,8 @@ import axios from "axios";
 import CommentComponent from "../components/CommentComponent.vue";
 import UploadForm from "../components/UploadForm.vue";
 import { config } from "../../config";
+import { ElNotification } from "element-plus";
+
 export default {
   components: {
     CommentComponent,
@@ -422,6 +427,45 @@ export default {
           alert("自動編集APIでエラーが発生しました");
         });
       this.isLoading = false;
+    },
+    async pdfTranslate() {
+      // this.isLoading = true;
+      ElNotification({
+        title: "Success",
+        message: `Start PDF Translate\nPlease hold for one minute.`,
+        type: "success",
+      });
+      await axios
+        .post(
+          `${config.URL}:${config.PORTPYTHON}/api/python/pdf_translate`,
+          {
+            file_path: this.paper.file_path,
+            paper_id: this.paper.ID,
+            sessionToken: localStorage.getItem("sessionToken"),
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then(() => {
+          this.getDB();
+          ElNotification({
+            title: "Success",
+            message: `Finish PDF Translate`,
+            type: "success",
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+          ElNotification({
+            title: "Error",
+            message: `Error: ${error.message}`,
+            type: "error",
+          });
+        });
+      // this.isLoading = false;
     },
     // bibTeX情報取得
     // async getBibTeX(targetFileId) {
