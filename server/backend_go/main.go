@@ -557,8 +557,10 @@ func userinfoHandler(w http.ResponseWriter, r *http.Request) {
 
 func userlistHandler(w http.ResponseWriter, r *http.Request) {
 	type User struct {
-		Username string
-		Filepath string
+		Id         int
+		Username   string
+		Filepath   string
+		PaperCount int
 	}
 
 	var UserList []User
@@ -568,6 +570,17 @@ func userlistHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("エラー:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// 各Userのpaperの数を取得する
+	for i, user := range UserList {
+		var paperCount int
+		if err := db.Model(&Papers{}).Where("user_id = ?", user.Id).Count(&paperCount).Error; err != nil {
+			fmt.Println("エラー:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		UserList[i].PaperCount = paperCount
 	}
 
 	// Userの中身をJSON形式で返す
