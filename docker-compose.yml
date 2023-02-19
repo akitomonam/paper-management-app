@@ -32,6 +32,8 @@ services:
     volumes:
       - ./server/backend_grobid:/workspace
     runtime: nvidia
+    depends_on:
+      - 'db-mysql'
     networks:
       - app_net
 
@@ -75,6 +77,8 @@ services:
     volumes:
       - ./client:/workspace
     command: sh -c "cd /workspace/Vue3 && npm install && npm run build && npm run serve"
+    depends_on:
+      - 'db-mysql'
     networks:
       - app_net
 
